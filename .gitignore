@@ -1,0 +1,17 @@
+# Node / Angular
+web/node_modules/
+web/dist/
+web/.angular/
+
+# Python / Flask
+services/__pycache__/
+services/env/
+services/*.pyc
+
+# IDE / Editor
+.vs/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
