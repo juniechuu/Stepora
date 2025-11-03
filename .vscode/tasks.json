@@ -1,0 +1,42 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+    "label": "Run Flask",
+    "type": "shell",
+    "command": "python",
+    "args": ["app.py"],
+    "options": { "cwd": "service" },
+    "isBackground": true,
+    "problemMatcher": {
+        "owner": "python",
+        "pattern": [
+        {
+            "regexp": ".",
+            "file": 1,
+            "location": 2,
+            "message": 3
+        }
+        ],
+        "background": {
+        "activeOnStart": true,
+        "beginsPattern": ".",
+        "endsPattern": "Running on"
+        }
+    }
+    },
+    {
+      "label": "Run Angular",
+      "type": "shell",
+      "command": "npm run start -- --open",
+      "options": { "cwd": "web" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Both (Flask + Angular)",
+      "dependsOn": ["Run Flask", "Run Angular"],
+      "dependsOrder": "parallel"
+    }
+  ]
+}

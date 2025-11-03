@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Flask + Angular",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/web/node_modules/@angular/cli/bin/ng",
+      "args": ["serve", "--open"],
+      "preLaunchTask": "Run Flask",
+      "cwd": "${workspaceFolder}/web",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+}
