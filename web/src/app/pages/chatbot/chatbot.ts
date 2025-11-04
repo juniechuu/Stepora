@@ -4,8 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 // Services
-import { AiService } from '../../services/ai.service';
-import { HelperService } from '../../services/helper.service';
+import { AiService } from '../../endpoints/ai.service';
+import { HelperService } from '../../endpoints/helper.service';
 
 @Component({
     selector: 'app-chatbot',
@@ -54,7 +54,7 @@ export class Chatbot {
         this.aiService.sendPromptToOpenAI(this.prompt).subscribe({
             next: (response) => {
                 console.log('Response from OpenAI:', response);
-                this.response = response.status;
+                this.response = response.response;
                 this.isLoading = false;
             },
             error: (error) => {
