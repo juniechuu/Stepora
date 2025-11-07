@@ -1,16 +1,172 @@
 /* You can add global styles to this file, and also import other style files */
+/* eslint-disable */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// Font
+@font-face {
+    font-family: CursorGothic;
+    src: url('/fonts/CursorGothic-Regular.woff2') format('woff2');
+    font-display: swap;
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: CursorGothic;
+    src: url('/fonts/CursorGothic-Italic.woff2') format('woff2');
+    font-display: swap;
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: CursorGothic;
+    src: url('/fonts/CursorGothic-Bold.woff2') format('woff2');
+    font-display: swap;
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: CursorGothic;
+    src: url('/fonts/CursorGothic-BoldItalic.woff2') format('woff2');
+    font-display: swap;
+    font-weight: 700;
+    font-style: italic;
+}
+
+body {
+  font-family: 'CursorGothic', sans-serif;
+  background: linear-gradient(135deg, 
+    #0c0c0c 0%,
+    #1a0b2e 15%,
+    #16213e 30%,
+    #0f3460 45%,
+    #533483 60%,
+    #7209b7 75%,
+    #2d1b69 85%,
+    #0c0c0c 100%
+  );
+  background-attachment: fixed;
+  background-size: 400% 400%;
+  animation: galaxyShift 20s ease infinite;
+  min-height: 100vh;
+}
+
+@keyframes galaxyShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+// Sparkly stars overlay
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+    radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(2px 2px at 160px 30px, #eee, transparent),
+    radial-gradient(1px 1px at 200px 90px, #fff, transparent),
+    radial-gradient(2px 2px at 240px 50px, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 280px 10px, #eee, transparent),
+    radial-gradient(1px 1px at 320px 70px, rgba(255,255,255,0.9), transparent),
+    radial-gradient(2px 2px at 360px 40px, #fff, transparent);
+  background-repeat: repeat;
+  background-size: 400px 400px;
+  animation: sparkle 8s linear infinite, twinkle 4s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: -1;
+}
+
+// Additional twinkling layer
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(1px 1px at 50px 60px, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 100px 20px, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 150px 100px, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 220px 30px, rgba(255,255,255,0.2), transparent),
+    radial-gradient(1px 1px at 270px 80px, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 350px 60px, rgba(255,255,255,0.3), transparent);
+  background-repeat: repeat;
+  background-size: 450px 450px;
+  animation: sparkle 12s linear infinite reverse, pulse 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes sparkle {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-400px) rotate(360deg);
+  }
+}
+
+@keyframes twinkle {
+  0% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+// Bootstrap Classes
+
+// begin::Card Styles
 .card {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   border: none;
 }
 
 .card-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-bottom: none;
+  border-bottom: 1px solid #E5E7EB;
+  background-color: white;
+  padding-left: 1.5rem;
 }
 
-.card-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
+.card-body {
+  padding: 1.5rem;
 }
+// end::Card Styles
+
+// begin::Navigation Links
+.nav-link.active {
+    border-bottom: 2px solid #fff;
+}
+
+.nav-link:hover {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.6);
+}
+// end::Navigation Links

@@ -17,7 +17,7 @@ CORS(app)  # Allow requests from Angular (different port)
 # Configure OpenAI
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
-# Register blueprints
+# Blueprints
 app.register_blueprint(helper_bp, url_prefix='/api')
 app.register_blueprint(ai_bp, url_prefix='/api')
 

@@ -11,6 +11,6 @@ export class HelperService {
     constructor(private http: HttpClient) {}
 
     getHello(): Observable<any> {
-		return this.http.get(`${this.baseUrl}/hello`);
-	}
+        return this.http.get(`${this.baseUrl}/hello`);
+    }
 }
