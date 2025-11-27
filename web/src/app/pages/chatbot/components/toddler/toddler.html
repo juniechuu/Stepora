@@ -1,0 +1,234 @@
+<div class="toddler-container">
+  <!-- Floating Characters -->
+  <div class="floating-characters">
+    <img src="/icons/pikachu.svg" class="float-char char-1" alt="Pikachu">
+    <img src="/icons/nyan-cat.svg" class="float-char char-2" alt="Nyan Cat">
+    <img src="/icons/rainbow.svg" class="float-char char-3" alt="Rainbow">
+    <img src="/icons/unicorn.svg" class="float-char char-4" alt="Unicorn">
+  </div>
+
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="title-wrapper">
+      <img src="/icons/sparkles.svg" class="sparkle sparkle-left" alt="sparkle">
+      <h1 class="title">Hi there, little explorer!</h1>
+      <img src="/icons/sparkles.svg" class="sparkle sparkle-right" alt="sparkle">
+    </div>
+    <p class="subtitle">✨ What do you want to learn today? ✨</p>
+  </div>
+
+  <!-- Search Input -->
+  <div class="search-section">
+    <div class="search-wrapper">
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery"
+        (keydown)="handleKeyPress($event)"
+        placeholder="Type your question here..."
+        class="search-input"
+        [disabled]="isLoading"
+      />
+      <button 
+        class="experimental-button"
+        (click)="toggleExperimentalMode()"
+        [class.active]="experimentalMode"
+        title="Toggle Experimental Mode"
+      >
+        <img src="/icons/rocket.svg" class="rocket-icon" alt="experimental">
+      </button>
+      <button 
+        (click)="handleSearch()" 
+        [disabled]="!searchQuery.trim() || isLoading"
+        class="search-button"
+      >
+        @if (isLoading) {
+          <span class="loader"></span>
+        } @else {
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+        }
+      </button>
+    </div>
+    @if (error) {
+      <p class="error-message">{{ error }}</p>
+    }
+  </div>
+
+  <!-- Preset Questions -->
+  <div class="preset-section">
+    <h2 class="preset-title">Or pick a question:</h2>
+    <div class="preset-grid">
+      @for (preset of presetQuestions; track preset.question) {
+        <button 
+          class="preset-button"
+          (click)="handlePresetClick(preset.question)"
+          [disabled]="isLoading"
+          [style.border-color]="preset.color"
+        >
+          <div class="preset-icon" [style.background]="preset.color">
+            <img [src]="preset.icon" [alt]="preset.question" class="icon-img">
+          </div>
+          <p class="preset-text">{{ preset.question }}</p>
+          <div class="star-rating">
+            <img src="/icons/star.svg" class="mini-star" alt="star">
+            <img src="/icons/star.svg" class="mini-star" alt="star">
+            <img src="/icons/star.svg" class="mini-star" alt="star">
+          </div>
+        </button>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Step Modal -->
+@if (showModal && !experimentalMode) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="step-modal" (click)="$event.stopPropagation()">
+      <button class="close-button" (click)="closeModal()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+      
+      <div class="modal-header">
+        <div class="helper-character">
+          <img src="/icons/owl-1.svg" class="owl-helper" alt="Wise Owl">
+        </div>
+        <h2 class="modal-title">{{ modalQuestion }}</h2>
+        <div class="step-indicator">
+          <img src="/icons/light-bulb-on.svg" class="bulb-icon" alt="step">
+          Step {{ currentStep + 1 }} of {{ steps.length }}
+        </div>
+      </div>
+      
+      <div class="modal-body">
+        <div class="step-content">
+          <div class="step-number">{{ currentStep + 1 }}</div>
+          {{ steps[currentStep] }}
+        </div>
+        <div class="celebration-stars">
+          <img src="/icons/star.svg" class="celebration-star" alt="star">
+          <img src="/icons/star.svg" class="celebration-star" alt="star">
+          <img src="/icons/star.svg" class="celebration-star" alt="star">
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button 
+          class="nav-button prev-button" 
+          (click)="prevStep()" 
+          [disabled]="currentStep === 0"
+        >
+          <img src="/icons/arrow-left.svg" class="nav-icon" alt="previous">
+          Back
+        </button>
+        
+        @if (currentStep === steps.length - 1) {
+          <button 
+            class="nav-button done-button" 
+            (click)="closeModal()"
+          >
+            <img src="/icons/thumb-up.svg" class="nav-icon" alt="done">
+            All Done!
+          </button>
+        } @else {
+          <button 
+            class="nav-button next-button" 
+            (click)="nextStep()"
+          >
+            Next Step
+            <img src="/icons/arrow-right.svg" class="nav-icon" alt="next">
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Experimental Mode Modal -->
+@if (showModal && experimentalMode) {
+  <div class="modal-overlay experimental-overlay" (click)="closeModal()">
+    <div class="experimental-modal" (click)="$event.stopPropagation()">
+      <button class="close-button experimental-close" (click)="closeModal()">
+        <img src="/icons/x.svg" class="close-icon" alt="close">
+      </button>
+      
+      <div class="experimental-header">
+        <div class="rocket-badge">
+          <img src="/icons/rocket.svg" class="rocket-large" alt="Experimental">
+        </div>
+        <h2 class="experimental-title">{{ modalQuestion }}</h2>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="((currentStep + 1) / steps.length) * 100"></div>
+        </div>
+        <div class="step-counter">
+          <img src="/icons/fire.svg" class="fire-icon" alt="progress">
+          <span>{{ currentStep + 1 }} / {{ steps.length }}</span>
+        </div>
+      </div>
+      
+      <div class="experimental-body">
+        <div class="step-visual">
+          <img src="/icons/light-bulb-on.svg" class="step-visual-icon" alt="idea">
+        </div>
+        <div class="experimental-content">
+          <div class="mega-step-number">
+            <img src="/icons/star.svg" class="star-number" alt="star">
+            <span>{{ currentStep + 1 }}</span>
+          </div>
+          <p class="step-text">{{ steps[currentStep] }}</p>
+        </div>
+        <div class="fun-characters">
+          <img src="/icons/nyan-cat.svg" class="fun-char" alt="nyan">
+          <img src="/icons/surprised-pikachu.svg" class="fun-char" alt="pikachu">
+        </div>
+      </div>
+      
+      <div class="experimental-footer">
+        <button 
+          class="exp-nav-button prev-exp-button" 
+          (click)="prevStep()" 
+          [disabled]="currentStep === 0"
+        >
+          <img src="/icons/caret-left.svg" class="exp-nav-icon" alt="previous">
+          <span>Previous</span>
+        </button>
+        
+        <div class="step-dots">
+          @for (step of steps; track $index) {
+            <div 
+              class="dot" 
+              [class.active]="$index === currentStep"
+              [class.completed]="$index < currentStep"
+              (click)="currentStep = $index"
+            >
+              @if ($index < currentStep) {
+                <img src="/icons/star.svg" class="dot-star" alt="done">
+              }
+            </div>
+          }
+        </div>
+        
+        @if (currentStep === steps.length - 1) {
+          <button 
+            class="exp-nav-button complete-button" 
+            (click)="closeModal()"
+          >
+            <img src="/icons/trophy.svg" class="exp-nav-icon" alt="trophy">
+            <span>Complete!</span>
+          </button>
+        } @else {
+          <button 
+            class="exp-nav-button next-exp-button" 
+            (click)="nextStep()"
+          >
+            <span>Next</span>
+            <img src="/icons/caret-right.svg" class="exp-nav-icon" alt="next">
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,192 @@
+<div class="professional-container">
+  <!-- Search Section -->
+  <div class="search-section">
+    <div class="search-header">
+      <h1 class="main-title">How-To Guides & Tutorials</h1>
+      <p class="subtitle">Professional step-by-step instructions for anything you want to learn</p>
+    </div>
+    
+    <div class="search-box">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery"
+          (keydown)="handleKeyPress($event)"
+          placeholder="What would you like to learn? (e.g., How to create a website...)"
+          class="search-input"
+          [disabled]="isLoading"
+        />
+        <button 
+          class="experimental-toggle"
+          (click)="toggleExperimentalMode()"
+          [class.active]="experimentalMode"
+          [title]="experimentalMode ? 'Experimental Mode: ON - Will scrape web articles' : 'Experimental Mode: OFF'"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 16v-4"></path>
+            <path d="M12 8h.01"></path>
+          </svg>
+        </button>
+        <button 
+          (click)="searchTutorial()" 
+          [disabled]="!searchQuery.trim() || isLoading"
+          class="search-btn"
+        >
+          @if (isLoading) {
+            <span class="spinner"></span>
+          } @else {
+            Search
+          }
+        </button>
+      </div>
+      @if (experimentalMode) {
+        <div class="experimental-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+          <span>Experimental mode active - Will search and scrape web articles</span>
+        </div>
+      }
+      @if (error) {
+        <p class="error-text">{{ error }}</p>
+      }
+    </div>
+  </div>
+
+  <!-- Article Content -->
+  @if (article) {
+    <div class="article-container">
+      <!-- Article Header -->
+      <header class="article-header">
+        <h1 class="article-title">{{ article.title }}</h1>
+        <div class="article-meta">
+          <div class="meta-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>{{ article.readTime }} min read</span>
+          </div>
+          <div class="meta-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            <span>{{ article.difficulty }}</span>
+          </div>
+          <div class="meta-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Stepora AI</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Table of Contents -->
+      <aside class="table-of-contents">
+        <h3>Table of Contents</h3>
+        <ol class="toc-list">
+          @for (step of article.steps; track $index) {
+            <li>
+              <a (click)="scrollToStep($index)">{{ step.title }}</a>
+            </li>
+          }
+        </ol>
+      </aside>
+
+      <!-- Introduction -->
+      @if (article.introduction) {
+        <section class="article-section intro-section">
+          <p class="intro-text">{{ article.introduction }}</p>
+        </section>
+      }
+
+      <!-- Prerequisites -->
+      @if (article.prerequisites && article.prerequisites.length > 0) {
+        <section class="article-section prerequisites-section">
+          <h2>Prerequisites</h2>
+          <ul class="prerequisites-list">
+            @for (prereq of article.prerequisites; track prereq) {
+              <li>{{ prereq }}</li>
+            }
+          </ul>
+        </section>
+      }
+
+      <!-- Steps -->
+      <section class="steps-section">
+        @for (step of article.steps; track $index) {
+          <div class="step-item" [id]="'step-' + $index">
+            <div class="step-header">
+              <span class="step-number">Step {{ $index + 1 }}</span>
+              <h2 class="step-title">{{ step.title }}</h2>
+            </div>
+            <div class="step-content">
+              <p class="step-description">{{ step.description }}</p>
+              @if (step.tips && step.tips.length > 0) {
+                <div class="tips-box">
+                  <div class="tips-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    <strong>Pro Tips:</strong>
+                  </div>
+                  <ul class="tips-list">
+                    @for (tip of step.tips; track tip) {
+                      <li>{{ tip }}</li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </section>
+
+      <!-- Conclusion -->
+      @if (article.conclusion) {
+        <section class="article-section conclusion-section">
+          <h2>Conclusion</h2>
+          <p>{{ article.conclusion }}</p>
+        </section>
+      }
+
+      <!-- Related Resources -->
+      @if (article.relatedLinks && article.relatedLinks.length > 0) {
+        <section class="article-section resources-section">
+          <h2>Related Resources</h2>
+          <div class="resources-grid">
+            @for (link of article.relatedLinks; track link.title) {
+              <a [href]="link.url" target="_blank" class="resource-card">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+                <span>{{ link.title }}</span>
+              </a>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Back to Top -->
+      <div class="back-to-top">
+        <button (click)="scrollToTop()" class="btn-top">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+          Back to Top
+        </button>
+      </div>
+    </div>
+  }
+</div>

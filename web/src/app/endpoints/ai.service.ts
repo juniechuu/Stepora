@@ -13,4 +13,8 @@ export class AiService {
 	sendPromptToOpenAI(prompt: string): Observable<any> {
 		return this.http.post(`${this.baseUrl}/openai`, { prompt });
 	}
+
+	scrapeWikiHow(query: string): Observable<any> {
+		return this.http.post(`${this.baseUrl}/scrape-wikihow`, { query });
+	}
 }
