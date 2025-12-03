@@ -71,6 +71,13 @@ export class Toddler {
       return;
     }
 
+    // Business logic: Validate input length for better accuracy
+    const wordCount = question.trim().split(/\s+/).length;
+    if (wordCount < 3) {
+      this.error = 'Please ask a complete question with at least 3 words for better help! 😊';
+      return;
+    }
+
     this.isLoading = true;
     this.error = '';
 

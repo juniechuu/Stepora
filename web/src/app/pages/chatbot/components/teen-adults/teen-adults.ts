@@ -44,6 +44,13 @@ export class TeenAdults {
   searchTutorial(): void {
     if (!this.searchQuery.trim()) return;
 
+    // Business logic: Validate input length for better accuracy
+    const wordCount = this.searchQuery.trim().split(/\s+/).length;
+    if (wordCount < 3) {
+      this.error = 'Please provide more details (at least 3 words) for better accuracy. Example: "How to bake chocolate cake"';
+      return;
+    }
+
     this.isLoading = true;
     this.error = '';
     this.article = null;
