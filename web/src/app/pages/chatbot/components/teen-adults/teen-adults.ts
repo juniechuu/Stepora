@@ -40,14 +40,17 @@ export class TeenAdults {
   isLoading: boolean = false;
   error: string = '';
   experimentalMode: boolean = false;
+  showSuggestions: boolean = false;
+  suggestions: string[] = [];
+  isLoadingSuggestions: boolean = false;
 
   searchTutorial(): void {
     if (!this.searchQuery.trim()) return;
 
     // Business logic: Validate input length for better accuracy
     const wordCount = this.searchQuery.trim().split(/\s+/).length;
-    if (wordCount < 3) {
-      this.error = 'Please provide more details (at least 3 words) for better accuracy. Example: "How to bake chocolate cake"';
+    if (wordCount <= 3) {
+      this.generateSuggestions(this.searchQuery.trim());
       return;
     }
 
@@ -234,5 +237,52 @@ RELATED: [3-5 related topics or resources, one per line]`;
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  }
+
+  generateSuggestions(shortQuery: string): void {
+    this.showSuggestions = true;
+    this.isLoadingSuggestions = true;
+    this.suggestions = [];
+    this.error = '';
+
+    const prompt = `A user is searching for "${shortQuery}". This query is too short. Generate 4 complete, professional "How to" tutorial queries that the user might be looking for. Each should be detailed and specific (at least 4-5 words). Return ONLY the 4 queries, numbered 1-4, nothing else.`;
+
+    this.aiService.sendPromptToOpenAI(prompt).subscribe({
+      next: (response) => {
+        console.log('Suggestions from OpenAI:', response);
+        this.isLoadingSuggestions = false;
+        
+        const suggestionText = response.response || '';
+        const lines = suggestionText.split('\n').filter((line: string) => line.trim());
+        
+        this.suggestions = lines
+          .map((line: string) => line.replace(/^\d+\.?\s*/, '').trim())
+          .filter((line: string) => line.length > 0)
+          .slice(0, 4);
+
+        if (this.suggestions.length === 0) {
+          this.closeSuggestions();
+          this.error = 'Please provide more details (at least 4 words) for better accuracy.';
+        }
+      },
+      error: (error) => {
+        console.error('Error generating suggestions:', error);
+        this.isLoadingSuggestions = false;
+        this.closeSuggestions();
+        this.error = 'Please provide more details (at least 4 words) for better accuracy.';
+      }
+    });
+  }
+
+  selectSuggestion(suggestion: string): void {
+    this.searchQuery = suggestion;
+    this.closeSuggestions();
+    this.searchTutorial();
+  }
+
+  closeSuggestions(): void {
+    this.showSuggestions = false;
+    this.suggestions = [];
+    this.isLoadingSuggestions = false;
   }
 }

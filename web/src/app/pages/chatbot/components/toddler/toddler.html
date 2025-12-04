@@ -80,6 +80,46 @@
       }
     </div>
   </div>
+
+  <!-- AI Suggestions Modal -->
+  @if (showSuggestions) {
+    <div class="suggestions-overlay" (click)="closeSuggestions()">
+      <div class="suggestions-modal" (click)="$event.stopPropagation()">
+        <button class="close-button" (click)="closeSuggestions()">
+          <img src="/icons/x.svg" class="close-icon" alt="close">
+        </button>
+        
+        <div class="suggestions-header">
+          <img src="/icons/light-bulb-on.svg" class="bulb-icon" alt="idea">
+          <h2 class="suggestions-title">Did you mean?</h2>
+          <p class="suggestions-subtitle">Pick what you want to learn!</p>
+        </div>
+
+        <div class="suggestions-body">
+          @if (isLoadingSuggestions) {
+            <div class="suggestions-loading">
+              <div class="loading-spinner">
+                <img src="/icons/sparkles.svg" class="spinner-icon" alt="loading">
+              </div>
+              <p class="loading-text">Finding fun ideas for you...</p>
+            </div>
+          } @else {
+            <div class="suggestions-list">
+              @for (suggestion of suggestions; track suggestion) {
+                <button class="suggestion-card" (click)="selectSuggestion(suggestion)">
+                  <img src="/icons/star.svg" class="suggestion-star" alt="star">
+                  <span class="suggestion-text">{{ suggestion }}</span>
+                  <svg class="suggestion-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
 </div>
 
 <!-- Step Modal -->

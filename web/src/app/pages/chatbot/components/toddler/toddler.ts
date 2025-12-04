@@ -31,6 +31,11 @@ export class Toddler {
   modalQuestion: string = '';
   steps: string[] = [];
   currentStep: number = 0;
+  
+  // Suggestion state
+  showSuggestions: boolean = false;
+  suggestions: string[] = [];
+  isLoadingSuggestions: boolean = false;
 
   presetQuestions: PresetQuestion[] = [
     {
@@ -71,15 +76,16 @@ export class Toddler {
       return;
     }
 
-    // Business logic: Validate input length for better accuracy
+    // Business logic: Show suggestions for short queries
     const wordCount = question.trim().split(/\s+/).length;
-    if (wordCount < 3) {
-      this.error = 'Please ask a complete question with at least 3 words for better help! 😊';
+    if (wordCount <= 3) {
+      this.generateSuggestions(question);
       return;
     }
 
     this.isLoading = true;
     this.error = '';
+    this.showSuggestions = false;
 
     this.aiService.sendPromptToOpenAI(question).subscribe({
       next: (response) => {
@@ -144,6 +150,42 @@ export class Toddler {
     this.steps = [];
     this.currentStep = 0;
     this.modalQuestion = '';
+  }
+
+  generateSuggestions(shortQuery: string): void {
+    this.isLoadingSuggestions = true;
+    this.showSuggestions = true;
+    this.error = '';
+    this.suggestions = [];
+
+    const prompt = `A kid is searching for "${shortQuery}". Generate 4 complete, kid-friendly "How to" questions that they might be looking for. Make them simple and fun for children.
+
+Format: Return ONLY 4 questions, one per line, starting with "How to". No numbering, no extra text.`;
+
+    this.aiService.sendPromptToOpenAI(prompt).subscribe({
+      next: (response) => {
+        this.isLoadingSuggestions = false;
+        const lines = response.response.split('\n').filter((line: string) => line.trim().length > 0);
+        this.suggestions = lines.slice(0, 4).map((line: string) => line.replace(/^\d+\.\s*/, '').trim());
+      },
+      error: (error) => {
+        console.error('Error generating suggestions:', error);
+        this.isLoadingSuggestions = false;
+        this.error = 'Could not generate suggestions. Please try a longer question!';
+        this.showSuggestions = false;
+      }
+    });
+  }
+
+  selectSuggestion(suggestion: string): void {
+    this.searchQuery = suggestion;
+    this.showSuggestions = false;
+    this.askQuestion(suggestion);
+  }
+
+  closeSuggestions(): void {
+    this.showSuggestions = false;
+    this.suggestions = [];
   }
 
   nextStep(): void {

@@ -58,6 +58,57 @@
     </div>
   </div>
 
+  <!-- AI Suggestions Modal -->
+  @if (showSuggestions) {
+    <div class="suggestions-overlay" (click)="closeSuggestions()">
+      <div class="suggestions-modal" (click)="$event.stopPropagation()">
+        <button class="close-button" (click)="closeSuggestions()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        
+        <div class="suggestions-header">
+          <svg class="bulb-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18h6"></path>
+            <path d="M10 22h4"></path>
+            <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.33.47 2.55 1.5 3.5.76.76 1.23 1.52 1.41 2.5"></path>
+          </svg>
+          <h2 class="suggestions-title">Refine Your Search</h2>
+          <p class="suggestions-subtitle">Did you mean one of these?</p>
+        </div>
+
+        <div class="suggestions-body">
+          @if (isLoadingSuggestions) {
+            <div class="suggestions-loading">
+              <div class="loading-spinner">
+                <span class="spinner"></span>
+              </div>
+              <p class="loading-text">Generating suggestions...</p>
+            </div>
+          } @else {
+            <div class="suggestions-list">
+              @for (suggestion of suggestions; track suggestion) {
+                <button class="suggestion-card" (click)="selectSuggestion(suggestion)">
+                  <svg class="suggestion-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18h6"></path>
+                    <path d="M10 22h4"></path>
+                    <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.33.47 2.55 1.5 3.5.76.76 1.23 1.52 1.41 2.5"></path>
+                  </svg>
+                  <span class="suggestion-text">{{ suggestion }}</span>
+                  <svg class="suggestion-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
   <!-- Article Content -->
   @if (article) {
     <div class="article-container">
