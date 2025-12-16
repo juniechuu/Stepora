@@ -1,0 +1,73 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="text-center mb-4">
+      <img 
+        src="/logos/stepora_white.svg" 
+        alt="Stepora" 
+        width="150" 
+        height="100"
+        class="mb-3"
+      />
+      <h2 class="text-white">Welcome Back</h2>
+      <p class="text-secondary">Login to your account</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <label for="username" class="form-label text-white">Username or Email</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          id="username"
+          [(ngModel)]="username"
+          name="username"
+          placeholder="Enter your username or email"
+          required
+          [disabled]="isLoading"
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label text-white">Password</label>
+        <input 
+          type="password" 
+          class="form-control" 
+          id="password"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="Enter your password"
+          required
+          [disabled]="isLoading"
+        />
+      </div>
+
+      <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+        {{ errorMessage }}
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn btn-primary w-100 mb-3"
+        [disabled]="isLoading"
+      >
+        <span *ngIf="!isLoading">Login</span>
+        <span *ngIf="isLoading">
+          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          Logging in...
+        </span>
+      </button>
+
+      <div class="text-center">
+        <p class="text-secondary mb-0">
+          Don't have an account? 
+          <a 
+            class="text-primary cursor-pointer text-decoration-none" 
+            (click)="goToRegister()"
+          >
+            Register here
+          </a>
+        </p>
+      </div>
+    </form>
+  </div>
+</div>

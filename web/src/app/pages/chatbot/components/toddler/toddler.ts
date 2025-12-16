@@ -2,6 +2,8 @@ import { Component, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiService } from '../../../../endpoints/ai.service';
+import { DashboardService } from '../../../../endpoints/dashboard.service';
+import { AuthService } from '../../../../endpoints/auth.service';
 import { Router } from '@angular/router';
 
 interface PresetQuestion {
@@ -19,6 +21,8 @@ interface PresetQuestion {
 })
 export class Toddler {
   private aiService = inject(AiService);
+  private dashboardService = inject(DashboardService);
+  private authService = inject(AuthService);
   private router = inject(Router);
 
   searchQuery: string = '';
@@ -98,6 +102,13 @@ export class Toddler {
         this.modalQuestion = question;
         this.currentStep = 0;
         this.showModal = true;
+        
+        // Track search in history if user is logged in
+        if (this.authService.isLoggedIn()) {
+          this.dashboardService.addSearchHistory(question, 'toddler', this.steps.length).subscribe({
+            error: (err) => console.error('Failed to save search history:', err)
+          });
+        }
       },
       error: (error) => {
         console.error('Error calling OpenAI:', error);

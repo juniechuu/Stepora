@@ -2,6 +2,8 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiService } from '../../../../endpoints/ai.service';
+import { DashboardService } from '../../../../endpoints/dashboard.service';
+import { AuthService } from '../../../../endpoints/auth.service';
 
 interface Step {
   title: string;
@@ -34,6 +36,8 @@ interface Article {
 })
 export class TeenAdults {
   private aiService = inject(AiService);
+  private dashboardService = inject(DashboardService);
+  private authService = inject(AuthService);
 
   searchQuery: string = '';
   article: Article | null = null;
@@ -66,6 +70,17 @@ export class TeenAdults {
           this.isLoading = false;
           this.article = this.parseScrapedArticle(response);
           this.scrollToTop();
+          
+          // Track search in history if user is logged in
+          if (this.authService.isLoggedIn()) {
+            this.dashboardService.addSearchHistory(
+              this.searchQuery, 
+              'wikihow', 
+              this.article.steps.length
+            ).subscribe({
+              error: (err) => console.error('Failed to save search history:', err)
+            });
+          }
         },
         error: (error) => {
           console.error('Error scraping WikiHow:', error);
@@ -106,6 +121,17 @@ RELATED: [3-5 related topics or resources, one per line]`;
           this.isLoading = false;
           this.article = this.parseArticle(response.response || '', this.searchQuery);
           this.scrollToTop();
+          
+          // Track search in history if user is logged in
+          if (this.authService.isLoggedIn()) {
+            this.dashboardService.addSearchHistory(
+              this.searchQuery, 
+              'teen-adult', 
+              this.article.steps.length
+            ).subscribe({
+              error: (err) => console.error('Failed to save search history:', err)
+            });
+          }
         },
         error: (error) => {
           console.error('Error calling OpenAI:', error);

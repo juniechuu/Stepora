@@ -1,6 +1,6 @@
 <div class="w-100 bg-black shadow-md z-50" style="height: 50px">
     <div class="d-flex justify-content-between align-items-center px-4 h-100">
-        <!-- <span class="text-lg font-semibold text-white">Stepora</span> -->
+        <!-- Logo -->
         <img 
             src="/logos/stepora_white.svg" 
             alt="Home" 
@@ -9,13 +9,12 @@
         />
 
         <!-- begin::Navigation Links -->
-        <nav>
+        <nav class="d-flex align-items-center gap-4">
             <ul 
                 class="d-flex gap-4 mb-0 list-unstyled" 
                 style="font-size: small;"
                 >
                 <!-- 1. Home -->
-                
                 <li class="d-flex flex-row align-items-center">
                     <img 
                         src="/icons/house.svg" 
@@ -71,18 +70,87 @@
                     <img 
                         src="/icons/users.svg" 
                         class="me-2"
-                        alt="Home" 
+                        alt="About" 
                         width="17" 
                         height="17"
                     />
                     <a 
                         class="nav-link text-white text-decoration-none" 
-                        href="#"
+                        routerLink="/about"
                         >
                         About
                     </a>
                 </li>
             </ul>
+
+            <!-- Auth Section -->
+            <div class="auth-section" *ngIf="!isLoggedIn">
+                <button 
+                    class="btn btn-outline-light btn-sm me-2"
+                    (click)="goToLogin()"
+                    >
+                    Login
+                </button>
+                <button 
+                    class="btn btn-primary btn-sm"
+                    (click)="goToRegister()"
+                    >
+                    Sign Up
+                </button>
+            </div>
+
+            <!-- User Menu -->
+            <div class="user-menu position-relative" *ngIf="isLoggedIn">
+                <button 
+                    class="btn btn-link text-white text-decoration-none p-0"
+                    (click)="toggleUserMenu()"
+                    >
+                    <div class="d-flex align-items-center">
+                        <div class="user-avatar me-2">
+                            @if (currentUser?.profile_picture) {
+                                <img 
+                                    [src]="currentUser?.profile_picture" 
+                                    [alt]="currentUser?.username" 
+                                    class="profile-picture"
+                                    (error)="onImageError($event)"
+                                />
+                            } @else {
+                                {{ (currentUser?.username || 'U').charAt(0).toUpperCase() }}
+                            }
+                        </div>
+                        <span style="font-size: small;">{{ currentUser?.username }}</span>
+                    </div>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div class="user-dropdown" *ngIf="showUserMenu">
+                    <div class="dropdown-item user-info">
+                        <div class="fw-bold">{{ currentUser?.username }}</div>
+                        <div class="text-secondary small">{{ currentUser?.email }}</div>
+                    </div>
+                    <hr class="dropdown-divider my-1">
+                    <button class="dropdown-item" (click)="goToDashboard()">
+                        <img 
+                            src="/icons/user.svg" 
+                            alt="Dashboard" 
+                            width="16" 
+                            height="16"
+                            class="me-2"
+                        />
+                        My Dashboard
+                    </button>
+                    <button class="dropdown-item" (click)="logout()">
+                        <img 
+                            src="/icons/logout.svg" 
+                            alt="Logout" 
+                            width="16" 
+                            height="16"
+                            class="me-2"
+                        />
+                        Logout
+                    </button>
+                </div>
+            </div>
         </nav>
         <!-- end::Navigation Links -->
     </div>

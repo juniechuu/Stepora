@@ -1,0 +1,199 @@
+<div class="about-container">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <img 
+        src="/logos/stepora_white.svg" 
+        alt="Stepora" 
+        width="200" 
+        height="140"
+        class="mb-4"
+      />
+      <h1 class="hero-title">Welcome to Stepora</h1>
+      <p class="hero-subtitle">
+        Your intelligent learning companion for step-by-step guides and processes
+      </p>
+    </div>
+  </section>
+
+  <!-- Mission Section -->
+  <section class="mission-section">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+          <h2 class="section-title">Our Mission</h2>
+          <p class="section-text">
+            Stepora is designed to make learning accessible and enjoyable for everyone, 
+            regardless of age or technical ability. We believe that knowledge should be 
+            easy to find, understand, and apply.
+          </p>
+          <p class="section-text">
+            By combining AI-powered search, age-appropriate content delivery, and 
+            interactive guidance, we're transforming how people learn new skills and 
+            complete everyday tasks.
+          </p>
+        </div>
+        <div class="col-lg-6">
+          <div class="mission-card">
+            <div class="mission-icon">🎯</div>
+            <h3>Empowering Learners</h3>
+            <p>
+              We break down complex processes into simple, manageable steps that 
+              anyone can follow. From toddlers learning basic tasks to seniors 
+              discovering new technologies, Stepora adapts to every user's needs.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="container">
+      <h2 class="section-title text-center mb-5">What We Offer</h2>
+      <div class="features-grid">
+        <div *ngFor="let feature of features" class="feature-card">
+          <div class="feature-icon">
+            <img [src]="feature.icon" [alt]="feature.title" width="32" height="32" />
+          </div>
+          <h3 class="feature-title">{{ feature.title }}</h3>
+          <p class="feature-description">{{ feature.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="how-it-works-section">
+    <div class="container">
+      <h2 class="section-title text-center mb-5">How Stepora Works</h2>
+      <div class="row">
+        <div class="col-md-4 mb-4">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <h3 class="step-title">Search & Discover</h3>
+            <p class="step-description">
+              Enter any topic or task you want to learn about. Our AI-powered 
+              search finds the most relevant WikiHow articles and guides.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-4 mb-4">
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <h3 class="step-title">Learn & Interact</h3>
+            <p class="step-description">
+              Get step-by-step instructions adapted to your age group. Use our 
+              interactive chatbot to ask questions and get personalized guidance.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-4 mb-4">
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <h3 class="step-title">Track & Share</h3>
+            <p class="step-description">
+              Monitor your learning progress, rate content, and see your activity 
+              on your personal dashboard. Help others by sharing your ratings.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values Section -->
+  <section class="values-section">
+    <div class="container">
+      <h2 class="section-title text-center mb-5">Our Core Values</h2>
+      <div class="row">
+        <div class="col-md-3 col-sm-6 mb-4">
+          <div class="value-card">
+            <div class="value-emoji">♿</div>
+            <h4>Accessibility</h4>
+            <p>Learning for everyone, everywhere</p>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-4">
+          <div class="value-card">
+            <div class="value-emoji">🎓</div>
+            <h4>Education</h4>
+            <p>Knowledge is the key to growth</p>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-4">
+          <div class="value-card">
+            <div class="value-emoji">🤝</div>
+            <h4>Community</h4>
+            <p>Learning together, growing together</p>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-4">
+          <div class="value-card">
+            <div class="value-emoji">🚀</div>
+            <h4>Innovation</h4>
+            <p>Pushing boundaries with AI technology</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="row text-center">
+        <div class="col-md-3 col-sm-6 mb-4">
+          <div class="stat-item">
+            <div class="stat-number">3</div>
+            <div class="stat-label">Age Groups Supported</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-4">
+          <div class="stat-item">
+            <div class="stat-number">∞</div>
+            <div class="stat-label">Learning Topics</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-4">
+          <div class="stat-item">
+            <div class="stat-number">AI</div>
+            <div class="stat-label">Powered Intelligence</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-4">
+          <div class="stat-item">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Available Support</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container text-center">
+      <h2 class="cta-title">Ready to Start Learning?</h2>
+      <p class="cta-text">
+        Join Stepora today and discover a smarter way to learn new skills
+      </p>
+      <button class="btn btn-primary btn-lg" (click)="navigateToRegister()">
+        Get Started Now
+      </button>
+    </div>
+  </section>
+
+  <!-- Footer Section -->
+  <section class="footer-section">
+    <div class="container text-center">
+      <p class="footer-text">
+        © 2025 Stepora. Empowering learners through intelligent guidance.
+      </p>
+      <p class="footer-subtext">
+        Built with ❤️ using Angular and Flask
+      </p>
+    </div>
+  </section>
+</div>
