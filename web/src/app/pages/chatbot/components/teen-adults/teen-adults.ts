@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -7,6 +7,7 @@ import { DashboardService } from '../../../../endpoints/dashboard.service';
 import { AuthService } from '../../../../endpoints/auth.service';
 import { CacheService } from '../../../../endpoints/cache.service';
 import { CommentService, Comment } from '../../../../endpoints/comment.service';
+import { RatingService } from '../../../../endpoints/rating.service';
 
 interface Step {
   title: string;
@@ -37,12 +38,13 @@ interface Article {
   templateUrl: './teen-adults.html',
   styleUrl: './teen-adults.scss',
 })
-export class TeenAdults {
+export class TeenAdults implements OnInit {
   private aiService = inject(AiService);
   private dashboardService = inject(DashboardService);
   public authService = inject(AuthService);
   private cacheService = inject(CacheService);
   private commentService = inject(CommentService);
+  private ratingService = inject(RatingService);
 
   searchQuery: string = '';
   article: Article | null = null;
@@ -61,6 +63,26 @@ export class TeenAdults {
   replyText: string = '';
   isLoadingComments: boolean = false;
   currentSearchQuery: string = '';
+
+  // Rating section
+  userRating: number = 0;
+  hoveredRating: number = 0;
+  isSubmittingRating: boolean = false;
+  aggregateRating: number = 0;
+  totalRatings: number = 0;
+
+  ngOnInit(): void {
+    // Check for pending search from leaderboard
+    const pendingSearch = localStorage.getItem('teenAdultPendingSearch');
+    if (pendingSearch) {
+      this.searchQuery = pendingSearch;
+      localStorage.removeItem('teenAdultPendingSearch');
+      // Trigger search after a short delay to ensure component is fully loaded
+      setTimeout(() => {
+        this.searchTutorial();
+      }, 100);
+    }
+  }
 
   searchTutorial(): void {
     if (!this.searchQuery.trim()) return;
@@ -91,6 +113,8 @@ export class TeenAdults {
           this.currentSearchQuery = this.searchQuery;
           this.scrollToTop();
           this.loadComments();
+          this.loadUserRating();
+          this.loadAggregateRating();
           
           // Track search in history
           if (this.authService.isLoggedIn() && this.article) {
@@ -131,6 +155,8 @@ export class TeenAdults {
           this.currentSearchQuery = this.searchQuery;
           this.scrollToTop();
           this.loadComments();
+          this.loadUserRating();
+          this.loadAggregateRating();
           
           // Cache the result
           this.cacheService.storeCache(this.searchQuery, 'wikihow', this.article).subscribe({
@@ -191,6 +217,8 @@ RELATED: [3-5 related topics or resources, one per line]`;
         this.currentSearchQuery = this.searchQuery;
         this.scrollToTop();
         this.loadComments();
+        this.loadUserRating();
+        this.loadAggregateRating();
         
         // Cache the result
         this.cacheService.storeCache(this.searchQuery, 'teen-adult', this.article).subscribe({
@@ -459,5 +487,63 @@ RELATED: [3-5 related topics or resources, one per line]`;
   isCommentOwner(comment: Comment): boolean {
     const currentUser = this.authService.getCurrentUserValue();
     return currentUser ? comment.user_id === currentUser.id : false;
+  }
+
+  // Rating methods
+  loadUserRating(): void {
+    if (!this.authService.isLoggedIn() || !this.currentSearchQuery) return;
+    
+    this.ratingService.getUserRatingForItem('teen-adult', this.currentSearchQuery).subscribe({
+      next: (rating) => {
+        this.userRating = rating ? rating.rating : 0;
+      },
+      error: (error) => {
+        console.error('Error loading user rating:', error);
+      }
+    });
+  }
+
+  loadAggregateRating(): void {
+    if (!this.currentSearchQuery) return;
+    
+    this.ratingService.getItemRatingStats('teen-adult', this.currentSearchQuery).subscribe({
+      next: (stats) => {
+        this.aggregateRating = stats.average_rating;
+        this.totalRatings = stats.total_ratings;
+      },
+      error: (error) => {
+        console.error('Error loading aggregate rating:', error);
+      }
+    });
+  }
+
+  hoverRating(rating: number): void {
+    this.hoveredRating = rating;
+  }
+
+  clearHover(): void {
+    this.hoveredRating = 0;
+  }
+
+  submitRating(rating: number): void {
+    if (!this.authService.isLoggedIn() || !this.currentSearchQuery || this.isSubmittingRating) return;
+    
+    this.isSubmittingRating = true;
+    this.ratingService.addRating('teen-adult', this.currentSearchQuery, rating).subscribe({
+      next: () => {
+        this.userRating = rating;
+        this.isSubmittingRating = false;
+        this.loadAggregateRating(); // Reload aggregate stats after rating
+      },
+      error: (error) => {
+        console.error('Error submitting rating:', error);
+        this.isSubmittingRating = false;
+      }
+    });
+  }
+
+  getStarClass(starNumber: number): string {
+    const activeRating = this.hoveredRating || this.userRating;
+    return starNumber <= activeRating ? 'filled' : 'empty';
   }
 }

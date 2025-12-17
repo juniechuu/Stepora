@@ -148,6 +148,31 @@ def add_user_rating():
     except Exception as e:
         return jsonify({'error': f'Server error: {str(e)}'}), 500
 
+@dashboard_bp.route('/ratings/<item_type>/<item_id>/stats', methods=['GET'])
+def get_item_ratings_stats(item_type, item_id):
+    """Get aggregate rating statistics for a specific item"""
+    try:
+        from db.rating_service import get_item_rating_stats
+        
+        stats = get_item_rating_stats(item_type, item_id)
+        return jsonify(stats), 200
+        
+    except Exception as e:
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
+
+@dashboard_bp.route('/ratings/top-articles', methods=['GET'])
+def get_top_rated_articles():
+    """Get top rated articles across all types"""
+    try:
+        from db.rating_service import get_top_rated_articles
+        
+        limit = request.args.get('limit', 100, type=int)
+        articles = get_top_rated_articles(limit)
+        return jsonify({'articles': articles}), 200
+        
+    except Exception as e:
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
+
 # Upload configuration
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'uploads', 'profile_pictures')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}

@@ -114,7 +114,19 @@
     <div class="article-container">
       <!-- Article Header -->
       <header class="article-header">
-        <h1 class="article-title">{{ article.title }}</h1>
+        <div class="header-top">
+          <h1 class="article-title">{{ article.title }}</h1>
+          @if (totalRatings > 0) {
+            <div class="aggregate-rating">
+              <span class="rating-value">{{ aggregateRating.toFixed(1) }}</span>
+              <span class="rating-max">/5.0</span>
+              <svg class="rating-star" width="20" height="20" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <span class="rating-count">({{ totalRatings }} {{ totalRatings === 1 ? 'rating' : 'ratings' }})</span>
+            </div>
+          }
+        </div>
         <div class="article-meta">
           <div class="meta-item">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -228,6 +240,46 @@
           </div>
         </section>
       }
+
+      <!-- Rating Section -->
+      <section class="rating-section-container">
+        @if (authService.isLoggedIn()) {
+          <div class="rating-section">
+            <span class="rating-label">Rate this guide:</span>
+            <div class="stars-container" (mouseleave)="clearHover()">
+              @for (star of [1, 2, 3, 4, 5]; track star) {
+                <svg 
+                  class="star" 
+                  [class.filled]="getStarClass(star) === 'filled'"
+                  [class.empty]="getStarClass(star) === 'empty'"
+                  (mouseenter)="hoverRating(star)"
+                  (click)="submitRating(star)"
+                  width="24" 
+                  height="24" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  stroke-width="2"
+                >
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              }
+            </div>
+            @if (userRating > 0) {
+              <span class="rating-text">You rated this {{ userRating }}/5</span>
+            }
+            @if (isSubmittingRating) {
+              <span class="rating-submitting">Submitting...</span>
+            }
+          </div>
+        } @else {
+          <div class="rating-section">
+            <span class="rating-label">
+              <a routerLink="/login">Login</a> to rate this guide
+            </span>
+          </div>
+        }
+      </section>
 
       <!-- Comments Section -->
       <section class="comments-section">

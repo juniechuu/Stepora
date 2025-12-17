@@ -119,4 +119,10 @@ export class DashboardService {
       headers: this.getAuthHeaders()
     });
   }
+
+  getTopRatedArticles(limit: number = 100): Observable<{ articles: any[] }> {
+    return this.http.get<{ articles: any[] }>(
+      `${this.baseUrl}/ratings/top-articles?limit=${limit}`
+    );
+  }
 }
