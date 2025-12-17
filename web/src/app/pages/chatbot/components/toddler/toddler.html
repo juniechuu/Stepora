@@ -183,6 +183,104 @@
           </button>
         }
       </div>
+
+      <!-- Comments Section (Hidden for now) -->
+      <div class="comments-section" style="display: none;">
+        <h3 class="comments-title">
+          <img src="/icons/message-circle.svg" width="24" height="24" alt="comments">
+          Comments ({{ comments.length }})
+        </h3>
+
+        @if (authService.isLoggedIn()) {
+          <div class="add-comment">
+            <textarea 
+              class="comment-input"
+              [(ngModel)]="newComment"
+              placeholder="Share your thoughts..."
+              rows="3"
+            ></textarea>
+            <button class="comment-submit" (click)="addComment()" [disabled]="!newComment.trim()">
+              Post Comment
+            </button>
+          </div>
+        } @else {
+          <div class="login-prompt">
+            Please <a routerLink="/login">login</a> to comment
+          </div>
+        }
+
+        <div class="comments-list">
+          @if (isLoadingComments) {
+            <div class="loading-comments">Loading comments...</div>
+          } @else {
+            @for (comment of comments; track comment.id) {
+              <div class="comment">
+                <div class="comment-header">
+                  <div class="comment-author">
+                    @if (comment.profile_picture) {
+                      <img [src]="comment.profile_picture" class="author-avatar" alt="avatar">
+                    } @else {
+                      <div class="author-avatar-text">{{ comment.username.charAt(0).toUpperCase() }}</div>
+                    }
+                    <span class="author-name">{{ comment.username }}</span>
+                    <span class="comment-date">{{ comment.created_at | date: 'short' }}</span>
+                  </div>
+                  @if (isCommentOwner(comment)) {
+                    <button class="delete-comment" (click)="deleteComment(comment.id)">Delete</button>
+                  }
+                </div>
+                <p class="comment-text">{{ comment.comment_text }}</p>
+                <div class="comment-actions">
+                  @if (authService.isLoggedIn()) {
+                    <button class="reply-button" (click)="startReply(comment.id)">Reply</button>
+                  }
+                </div>
+
+                @if (replyingTo === comment.id) {
+                  <div class="reply-form">
+                    <textarea 
+                      class="reply-input"
+                      [(ngModel)]="replyText"
+                      placeholder="Write a reply..."
+                      rows="2"
+                    ></textarea>
+                    <div class="reply-actions">
+                      <button class="reply-submit" (click)="addReply(comment.id)" [disabled]="!replyText.trim()">
+                        Post Reply
+                      </button>
+                      <button class="reply-cancel" (click)="cancelReply()">Cancel</button>
+                    </div>
+                  </div>
+                }
+
+                @if (comment.replies && comment.replies.length > 0) {
+                  <div class="replies">
+                    @for (reply of comment.replies; track reply.id) {
+                      <div class="reply">
+                        <div class="comment-header">
+                          <div class="comment-author">
+                            @if (reply.profile_picture) {
+                              <img [src]="reply.profile_picture" class="author-avatar small" alt="avatar">
+                            } @else {
+                              <div class="author-avatar-text small">{{ reply.username.charAt(0).toUpperCase() }}</div>
+                            }
+                            <span class="author-name">{{ reply.username }}</span>
+                            <span class="comment-date">{{ reply.created_at | date: 'short' }}</span>
+                          </div>
+                          @if (isCommentOwner(reply)) {
+                            <button class="delete-comment" (click)="deleteComment(reply.id)">Delete</button>
+                          }
+                        </div>
+                        <p class="comment-text">{{ reply.comment_text }}</p>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+      </div>
     </div>
   </div>
 }

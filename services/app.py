@@ -10,6 +10,8 @@ from routes.ai_routes import ai_bp
 from routes.scraper_routes import scraper_bp
 from routes.auth_routes import auth_bp
 from routes.dashboard_routes import dashboard_bp
+from routes.cache_routes import cache_bp
+from routes.comment_routes import comment_bp
 
 # Import database
 from db import init_db
@@ -41,6 +43,8 @@ app.register_blueprint(ai_bp, url_prefix='/api')
 app.register_blueprint(scraper_bp, url_prefix='/api')
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
+app.register_blueprint(cache_bp, url_prefix='/api/cache')
+app.register_blueprint(comment_bp, url_prefix='/api/comments')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

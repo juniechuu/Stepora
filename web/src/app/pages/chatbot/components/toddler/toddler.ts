@@ -1,9 +1,12 @@
 import { Component, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { AiService } from '../../../../endpoints/ai.service';
 import { DashboardService } from '../../../../endpoints/dashboard.service';
 import { AuthService } from '../../../../endpoints/auth.service';
+import { CacheService } from '../../../../endpoints/cache.service';
+import { CommentService, Comment } from '../../../../endpoints/comment.service';
 import { Router } from '@angular/router';
 
 interface PresetQuestion {
@@ -15,15 +18,26 @@ interface PresetQuestion {
 @Component({
   selector: 'app-toddler',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './toddler.html',
   styleUrls: ['./toddler.scss', './experimental-modal.scss'],
 })
 export class Toddler {
   private aiService = inject(AiService);
   private dashboardService = inject(DashboardService);
-  private authService = inject(AuthService);
+  public authService = inject(AuthService);
+  private cacheService = inject(CacheService);
+  private commentService = inject(CommentService);
   private router = inject(Router);
+  
+  fromCache: boolean = false;
+  
+  // Comment section
+  comments: Comment[] = [];
+  newComment: string = '';
+  replyingTo: number | null = null;
+  replyText: string = '';
+  isLoadingComments: boolean = false;
 
   searchQuery: string = '';
   isLoading: boolean = false;
@@ -90,7 +104,43 @@ export class Toddler {
     this.isLoading = true;
     this.error = '';
     this.showSuggestions = false;
+    this.fromCache = false;
 
+    // Check cache first
+    this.cacheService.checkCache(question, 'toddler', 0.85).subscribe({
+      next: (cacheResponse) => {
+        if (cacheResponse.cached && cacheResponse.response) {
+          // Use cached response
+          console.log('Using cached response (similarity:', cacheResponse.similarity, ')');
+          this.isLoading = false;
+          this.fromCache = true;
+          this.steps = cacheResponse.response.steps || [];
+          this.modalQuestion = question;
+          this.currentStep = 0;
+          this.showModal = true;
+          
+          // Load comments
+          this.loadComments();
+          
+          // Track search in history
+          if (this.authService.isLoggedIn()) {
+            this.dashboardService.addSearchHistory(question, 'toddler-cached', this.steps.length).subscribe({
+              error: (err) => console.error('Failed to save search history:', err)
+            });
+          }
+        } else {
+          // Cache miss - call OpenAI
+          this.fetchFromAPI(question);
+        }
+      },
+      error: (err) => {
+        console.error('Cache check error, falling back to API:', err);
+        this.fetchFromAPI(question);
+      }
+    });
+  }
+
+  private fetchFromAPI(question: string): void {
     this.aiService.sendPromptToOpenAI(question).subscribe({
       next: (response) => {
         console.log('Response from OpenAI:', response);
@@ -102,6 +152,15 @@ export class Toddler {
         this.modalQuestion = question;
         this.currentStep = 0;
         this.showModal = true;
+        
+        // Load comments
+        this.loadComments();
+        
+        // Cache the result
+        this.cacheService.storeCache(question, 'toddler', { steps: this.steps }).subscribe({
+          next: () => console.log('Response cached successfully'),
+          error: (err) => console.error('Failed to cache response:', err)
+        });
         
         // Track search in history if user is logged in
         if (this.authService.isLoggedIn()) {
@@ -161,6 +220,86 @@ export class Toddler {
     this.steps = [];
     this.currentStep = 0;
     this.modalQuestion = '';
+    this.comments = [];
+    this.newComment = '';
+    this.replyingTo = null;
+    this.replyText = '';
+  }
+
+  loadComments(): void {
+    if (!this.modalQuestion) return;
+    
+    this.isLoadingComments = true;
+    this.commentService.getComments(this.modalQuestion, 'toddler').subscribe({
+      next: (response) => {
+        this.comments = this.commentService.organizeComments(response.comments);
+        this.isLoadingComments = false;
+      },
+      error: (error) => {
+        console.error('Error loading comments:', error);
+        this.isLoadingComments = false;
+      }
+    });
+  }
+
+  addComment(): void {
+    if (!this.newComment.trim() || !this.authService.isLoggedIn()) return;
+    
+    this.commentService.addComment(this.modalQuestion, 'toddler', this.newComment).subscribe({
+      next: (response) => {
+        this.newComment = '';
+        this.loadComments();
+      },
+      error: (error) => {
+        console.error('Error adding comment:', error);
+        alert('Failed to add comment. Please try again.');
+      }
+    });
+  }
+
+  startReply(commentId: number): void {
+    this.replyingTo = commentId;
+    this.replyText = '';
+  }
+
+  cancelReply(): void {
+    this.replyingTo = null;
+    this.replyText = '';
+  }
+
+  addReply(parentId: number): void {
+    if (!this.replyText.trim() || !this.authService.isLoggedIn()) return;
+    
+    this.commentService.addComment(this.modalQuestion, 'toddler', this.replyText, parentId).subscribe({
+      next: (response) => {
+        this.replyText = '';
+        this.replyingTo = null;
+        this.loadComments();
+      },
+      error: (error) => {
+        console.error('Error adding reply:', error);
+        alert('Failed to add reply. Please try again.');
+      }
+    });
+  }
+
+  deleteComment(commentId: number): void {
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+    
+    this.commentService.deleteComment(commentId).subscribe({
+      next: () => {
+        this.loadComments();
+      },
+      error: (error) => {
+        console.error('Error deleting comment:', error);
+        alert('Failed to delete comment.');
+      }
+    });
+  }
+
+  isCommentOwner(comment: Comment): boolean {
+    const currentUser = this.authService.getCurrentUserValue();
+    return currentUser ? currentUser.id === comment.user_id : false;
   }
 
   generateSuggestions(shortQuery: string): void {

@@ -71,6 +71,57 @@ def init_db():
         )
     ''')
     
+    # Create cached_searches table for intelligent caching with RAG
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS cached_searches (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            search_query TEXT NOT NULL,
+            normalized_query TEXT NOT NULL,
+            search_type TEXT NOT NULL,
+            response_data TEXT NOT NULL,
+            embedding TEXT,
+            hit_count INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_accessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    cursor.execute('''
+        CREATE INDEX IF NOT EXISTS idx_normalized_query 
+        ON cached_searches(normalized_query)
+    ''')
+    
+    cursor.execute('''
+        CREATE INDEX IF NOT EXISTS idx_search_type 
+        ON cached_searches(search_type)
+    ''')
+    
+    # Create comments table for user comments on search results
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS comments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            search_query TEXT NOT NULL,
+            search_type TEXT NOT NULL,
+            comment_text TEXT NOT NULL,
+            parent_id INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            FOREIGN KEY (parent_id) REFERENCES comments(id)
+        )
+    ''')
+    
+    cursor.execute('''
+        CREATE INDEX IF NOT EXISTS idx_comments_search 
+        ON comments(search_query, search_type)
+    ''')
+    
+    cursor.execute('''
+        CREATE INDEX IF NOT EXISTS idx_comments_parent 
+        ON comments(parent_id)
+    ''')
+    
     conn.commit()
     conn.close()
     print(f"Database initialized at {DB_PATH}")

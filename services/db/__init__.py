@@ -56,6 +56,25 @@ from .stats_service import (
     get_popular_searches
 )
 
+# Cache operations
+from .cache_service import (
+    find_similar_cached_search,
+    cache_search_result,
+    increment_cache_hit,
+    get_cache_stats,
+    clear_old_cache
+)
+
+# Comment operations
+from .comment_service import (
+    add_comment,
+    get_comments_for_search,
+    get_comment_by_id,
+    update_comment,
+    delete_comment,
+    get_comment_count
+)
+
 __all__ = [
     # Connection
     'get_db_connection',
@@ -99,5 +118,20 @@ __all__ = [
     'get_user_dashboard_stats',
     'get_user_activity_timeline',
     'get_global_stats',
-    'get_popular_searches'
+    'get_popular_searches',
+    
+    # Cache operations
+    'find_similar_cached_search',
+    'cache_search_result',
+    'increment_cache_hit',
+    'get_cache_stats',
+    'clear_old_cache',
+    
+    # Comment operations
+    'add_comment',
+    'get_comments_for_search',
+    'get_comment_by_id',
+    'update_comment',
+    'delete_comment',
+    'get_comment_count'
 ]

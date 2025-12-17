@@ -1,9 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { AiService } from '../../../../endpoints/ai.service';
 import { DashboardService } from '../../../../endpoints/dashboard.service';
 import { AuthService } from '../../../../endpoints/auth.service';
+import { CacheService } from '../../../../endpoints/cache.service';
+import { CommentService, Comment } from '../../../../endpoints/comment.service';
 
 interface Step {
   title: string;
@@ -30,14 +33,16 @@ interface Article {
 @Component({
   selector: 'app-teen-adults',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './teen-adults.html',
   styleUrl: './teen-adults.scss',
 })
 export class TeenAdults {
   private aiService = inject(AiService);
   private dashboardService = inject(DashboardService);
-  private authService = inject(AuthService);
+  public authService = inject(AuthService);
+  private cacheService = inject(CacheService);
+  private commentService = inject(CommentService);
 
   searchQuery: string = '';
   article: Article | null = null;
@@ -47,6 +52,15 @@ export class TeenAdults {
   showSuggestions: boolean = false;
   suggestions: string[] = [];
   isLoadingSuggestions: boolean = false;
+  fromCache: boolean = false;
+
+  // Comment section
+  comments: Comment[] = [];
+  newComment: string = '';
+  replyingTo: number | null = null;
+  replyText: string = '';
+  isLoadingComments: boolean = false;
+  currentSearchQuery: string = '';
 
   searchTutorial(): void {
     if (!this.searchQuery.trim()) return;
@@ -61,15 +75,68 @@ export class TeenAdults {
     this.isLoading = true;
     this.error = '';
     this.article = null;
+    this.fromCache = false;
 
-    if (this.experimentalMode) {
-      // Experimental mode: Scrape WikiHow
-      this.aiService.scrapeWikiHow(this.searchQuery).subscribe({
+    const searchType = this.experimentalMode ? 'wikihow' : 'teen-adult';
+
+    // Check cache first
+    this.cacheService.checkCache(this.searchQuery, searchType, 0.85).subscribe({
+      next: (cacheResponse) => {
+        if (cacheResponse.cached && cacheResponse.response) {
+          // Use cached response
+          console.log('Using cached response (similarity:', cacheResponse.similarity, ')');
+          this.isLoading = false;
+          this.fromCache = true;
+          this.article = cacheResponse.response;
+          this.currentSearchQuery = this.searchQuery;
+          this.scrollToTop();
+          this.loadComments();
+          
+          // Track search in history
+          if (this.authService.isLoggedIn() && this.article) {
+            this.dashboardService.addSearchHistory(
+              this.searchQuery, 
+              searchType + '-cached', 
+              this.article.steps.length
+            ).subscribe({
+              error: (err) => console.error('Failed to save search history:', err)
+            });
+          }
+        } else {
+          // Cache miss - fetch from source
+          if (this.experimentalMode) {
+            this.fetchFromWikiHow();
+          } else {
+            this.fetchFromAI();
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Cache check error, falling back to source:', err);
+        if (this.experimentalMode) {
+          this.fetchFromWikiHow();
+        } else {
+          this.fetchFromAI();
+        }
+      }
+    });
+  }
+
+  private fetchFromWikiHow(): void {
+    this.aiService.scrapeWikiHow(this.searchQuery).subscribe({
         next: (response) => {
           console.log('WikiHow scrape response:', response);
           this.isLoading = false;
           this.article = this.parseScrapedArticle(response);
+          this.currentSearchQuery = this.searchQuery;
           this.scrollToTop();
+          this.loadComments();
+          
+          // Cache the result
+          this.cacheService.storeCache(this.searchQuery, 'wikihow', this.article).subscribe({
+            next: () => console.log('WikiHow response cached'),
+            error: (err) => console.error('Failed to cache response:', err)
+          });
           
           // Track search in history if user is logged in
           if (this.authService.isLoggedIn()) {
@@ -88,9 +155,10 @@ export class TeenAdults {
           this.error = error.error?.error || 'Failed to scrape WikiHow. Try a different query.';
         }
       });
-    } else {
-      // Normal mode: Use AI knowledge
-      const prompt = `Write a comprehensive, professional how-to article about: ${this.searchQuery}. 
+  }
+
+  private fetchFromAI(): void {
+    const prompt = `Write a comprehensive, professional how-to article about: ${this.searchQuery}. 
 
 Format the response EXACTLY as follows:
 
@@ -115,31 +183,38 @@ CONCLUSION: [Summary and final thoughts]
 
 RELATED: [3-5 related topics or resources, one per line]`;
       
-      this.aiService.sendPromptToOpenAI(prompt).subscribe({
-        next: (response) => {
-          console.log('Response from OpenAI:', response);
-          this.isLoading = false;
-          this.article = this.parseArticle(response.response || '', this.searchQuery);
-          this.scrollToTop();
-          
-          // Track search in history if user is logged in
-          if (this.authService.isLoggedIn()) {
-            this.dashboardService.addSearchHistory(
-              this.searchQuery, 
-              'teen-adult', 
-              this.article.steps.length
-            ).subscribe({
-              error: (err) => console.error('Failed to save search history:', err)
-            });
-          }
-        },
-        error: (error) => {
-          console.error('Error calling OpenAI:', error);
-          this.isLoading = false;
-          this.error = error.error?.error || 'An error occurred while processing your request';
+    this.aiService.sendPromptToOpenAI(prompt).subscribe({
+      next: (response) => {
+        console.log('Response from OpenAI:', response);
+        this.isLoading = false;
+        this.article = this.parseArticle(response.response || '', this.searchQuery);
+        this.currentSearchQuery = this.searchQuery;
+        this.scrollToTop();
+        this.loadComments();
+        
+        // Cache the result
+        this.cacheService.storeCache(this.searchQuery, 'teen-adult', this.article).subscribe({
+          next: () => console.log('AI response cached'),
+          error: (err) => console.error('Failed to cache response:', err)
+        });
+        
+        // Track search in history if user is logged in
+        if (this.authService.isLoggedIn()) {
+          this.dashboardService.addSearchHistory(
+            this.searchQuery, 
+            'teen-adult', 
+            this.article.steps.length
+          ).subscribe({
+            error: (err) => console.error('Failed to save search history:', err)
+          });
         }
-      });
-    }
+      },
+      error: (error) => {
+        console.error('Error calling OpenAI:', error);
+        this.isLoading = false;
+        this.error = error.error?.error || 'An error occurred while processing your request';
+      }
+    });
   }
 
   parseScrapedArticle(response: any): Article {
@@ -310,5 +385,79 @@ RELATED: [3-5 related topics or resources, one per line]`;
     this.showSuggestions = false;
     this.suggestions = [];
     this.isLoadingSuggestions = false;
+  }
+
+  // Comment methods
+  loadComments(): void {
+    if (!this.currentSearchQuery) return;
+    
+    this.isLoadingComments = true;
+    this.commentService.getComments(this.currentSearchQuery, 'teen-adult').subscribe({
+      next: (response) => {
+        this.comments = this.commentService.organizeComments(response.comments);
+        this.isLoadingComments = false;
+      },
+      error: (error) => {
+        console.error('Error loading comments:', error);
+        this.isLoadingComments = false;
+      }
+    });
+  }
+
+  addComment(): void {
+    if (!this.newComment.trim() || !this.authService.isLoggedIn() || !this.currentSearchQuery) return;
+    
+    this.commentService.addComment(this.currentSearchQuery, 'teen-adult', this.newComment).subscribe({
+      next: (response) => {
+        this.newComment = '';
+        this.loadComments();
+      },
+      error: (error) => {
+        console.error('Error adding comment:', error);
+      }
+    });
+  }
+
+  startReply(commentId: number): void {
+    this.replyingTo = commentId;
+    this.replyText = '';
+  }
+
+  cancelReply(): void {
+    this.replyingTo = null;
+    this.replyText = '';
+  }
+
+  addReply(parentId: number): void {
+    if (!this.replyText.trim() || !this.authService.isLoggedIn() || !this.currentSearchQuery) return;
+    
+    this.commentService.addComment(this.currentSearchQuery, 'teen-adult', this.replyText, parentId).subscribe({
+      next: (response) => {
+        this.replyText = '';
+        this.replyingTo = null;
+        this.loadComments();
+      },
+      error: (error) => {
+        console.error('Error adding reply:', error);
+      }
+    });
+  }
+
+  deleteComment(commentId: number): void {
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+    
+    this.commentService.deleteComment(commentId).subscribe({
+      next: () => {
+        this.loadComments();
+      },
+      error: (error) => {
+        console.error('Error deleting comment:', error);
+      }
+    });
+  }
+
+  isCommentOwner(comment: Comment): boolean {
+    const currentUser = this.authService.getCurrentUserValue();
+    return currentUser ? comment.user_id === currentUser.id : false;
   }
 }
