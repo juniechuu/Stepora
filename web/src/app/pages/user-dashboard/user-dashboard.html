@@ -1,308 +1,368 @@
 <div class="dashboard-container">
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-    <p class="text-white mt-3">Loading your dashboard...</p>
-  </div>
-
-  <!-- Dashboard Content -->
-  <div *ngIf="!isLoading" class="dashboard-content">
-    <!-- Header Section -->
-    <div class="dashboard-header">
-      <div class="profile-section">
-        <div class="profile-avatar-container">
-          <div class="profile-avatar" *ngIf="!userProfile?.profile_picture">
-            {{ getInitials() }}
-          </div>
-          <img 
-            *ngIf="userProfile?.profile_picture" 
-            [src]="userProfile?.profile_picture" 
-            alt="Profile Picture"
-            class="profile-picture"
-          />
-          <button class="edit-picture-btn" (click)="togglePictureEdit()" title="Change profile picture">
-            <img src="/icons/camera.svg" alt="Edit" width="20" height="20" />
-          </button>
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
         </div>
-        <div class="profile-info">
-          <h2 class="text-white mb-1">{{ userProfile?.full_name || userProfile?.username }}</h2>
-          <p class="text-secondary mb-1">&#64;{{ userProfile?.username }}</p>
-          <p class="text-secondary mb-0">
-            <img src="/icons/calendar.svg" alt="Joined" width="16" height="16" class="me-2" />
-            Member since {{ formatDate(userProfile?.created_at || '') }}
-          </p>
-        </div>
-      </div>
-
-      <!-- Profile Picture Edit Modal -->
-      <div *ngIf="isEditingPicture" class="picture-edit-modal">
-        <div class="picture-edit-content">
-          <h4 class="text-white mb-3">Update Profile Picture</h4>
-          
-          <!-- Mode Selector -->
-          <div class="btn-group w-100 mb-3" role="group">
-            <button 
-              type="button" 
-              class="btn" 
-              [class.btn-primary]="uploadMode === 'file'"
-              [class.btn-outline-secondary]="uploadMode !== 'file'"
-              (click)="switchMode('file')"
-            >
-              Upload File
-            </button>
-            <button 
-              type="button" 
-              class="btn"
-              [class.btn-primary]="uploadMode === 'url'"
-              [class.btn-outline-secondary]="uploadMode !== 'url'"
-              (click)="switchMode('url')"
-            >
-              Use URL
-            </button>
-          </div>
-
-          <!-- File Upload Mode -->
-          <div *ngIf="uploadMode === 'file'" class="mb-3">
-            <label class="form-label text-white">Choose Image File</label>
-            <input 
-              type="file" 
-              class="form-control" 
-              accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
-              (change)="onFileSelected($event)"
-            />
-            <small class="text-secondary d-block mt-1">
-              Accepted formats: PNG, JPG, GIF, WebP (Max 5MB)
-            </small>
-            <small *ngIf="selectedFile" class="text-success d-block mt-1">
-              Selected: {{ selectedFile.name }} ({{ (selectedFile.size / 1024).toFixed(2) }} KB)
-            </small>
-          </div>
-
-          <!-- URL Mode -->
-          <div *ngIf="uploadMode === 'url'" class="mb-3">
-            <label class="form-label text-white">Picture URL</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              [(ngModel)]="newPictureUrl"
-              placeholder="https://example.com/your-picture.jpg"
-            />
-            <small class="text-secondary">Enter a direct link to your profile picture</small>
-          </div>
-
-          <div *ngIf="pictureError" class="alert alert-danger">
-            {{ pictureError }}
-          </div>
-
-          <div class="d-flex gap-2">
-            <button 
-              *ngIf="uploadMode === 'file'" 
-              class="btn btn-primary" 
-              (click)="uploadFile()"
-              [disabled]="!selectedFile"
-            >
-              Upload
-            </button>
-            <button 
-              *ngIf="uploadMode === 'url'" 
-              class="btn btn-primary" 
-              (click)="updateProfilePicture()"
-            >
-              Update Picture
-            </button>
-            <button class="btn btn-secondary" (click)="togglePictureEdit()">
-              Cancel
-            </button>
-            <button 
-              *ngIf="userProfile?.profile_picture" 
-              class="btn btn-danger ms-auto" 
-              (click)="removeProfilePicture()"
-            >
-              Remove Picture
-            </button>
-          </div>
-        </div>
-      </div>
+        <p class="text-white mt-3">Loading your dashboard...</p>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon bg-primary">
-          <img src="/icons/search.svg" alt="Searches" width="24" height="24" />
-        </div>
-        <div class="stat-info">
-          <h3>{{ stats?.total_searches || 0 }}</h3>
-          <p>Total Searches</p>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon bg-warning">
-          <img src="/icons/star.svg" alt="Ratings" width="24" height="24" />
-        </div>
-        <div class="stat-info">
-          <h3>{{ stats?.total_ratings || 0 }}</h3>
-          <p>Ratings Given</p>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon bg-success">
-          <img src="/icons/chart.svg" alt="Average" width="24" height="24" />
-        </div>
-        <div class="stat-info">
-          <h3>{{ stats?.average_rating || 0 }}<span class="small-text">/5.0</span></h3>
-          <p>Average Rating</p>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon bg-info">
-          <img src="/icons/activity.svg" alt="Recent" width="24" height="24" />
-        </div>
-        <div class="stat-info">
-          <h3>{{ stats?.recent_searches || 0 }}</h3>
-          <p>Last 7 Days</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="dashboard-tabs">
-      <button 
-        class="tab-button" 
-        [class.active]="activeTab === 'overview'"
-        (click)="setActiveTab('overview')"
-      >
-        Overview
-      </button>
-      <button 
-        class="tab-button" 
-        [class.active]="activeTab === 'history'"
-        (click)="setActiveTab('history')"
-      >
-        Search History
-      </button>
-      <button 
-        class="tab-button" 
-        [class.active]="activeTab === 'ratings'"
-        (click)="setActiveTab('ratings')"
-      >
-        My Ratings
-      </button>
-    </div>
-
-    <!-- Tab Content -->
-    <div class="tab-content">
-      <!-- Overview Tab -->
-      <div *ngIf="activeTab === 'overview'" class="overview-tab">
-        <div class="row">
-          <div class="col-md-6 mb-4">
-            <div class="content-card">
-              <h4 class="card-title">Recent Searches</h4>
-              <div *ngIf="searchHistory.length === 0" class="empty-state">
-                <p>No search history yet</p>
-              </div>
-              <div *ngIf="searchHistory.length > 0" class="list-container">
-                <div *ngFor="let search of searchHistory.slice(0, 5)" class="list-item">
-                  <div class="list-item-icon">
-                    <img src="/icons/search.svg" alt="Search" width="16" height="16" />
-                  </div>
-                  <div class="list-item-content">
-                    <p class="list-item-title">{{ search.search_query }}</p>
-                    <p class="list-item-meta">{{ getTimeAgo(search.created_at) }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-6 mb-4">
-            <div class="content-card">
-              <h4 class="card-title">Recent Ratings</h4>
-              <div *ngIf="ratings.length === 0" class="empty-state">
-                <p>No ratings yet</p>
-              </div>
-              <div *ngIf="ratings.length > 0" class="list-container">
-                <div *ngFor="let rating of ratings.slice(0, 5)" class="list-item">
-                  <div class="list-item-icon">
-                    <img src="/icons/star.svg" alt="Rating" width="16" height="16" />
-                  </div>
-                  <div class="list-item-content">
-                    <p class="list-item-title">{{ rating.item_type }} - {{ rating.item_id }}</p>
-                    <div class="rating-stars">
-                      <span *ngFor="let filled of getStarArray(rating.rating)" 
-                            class="star" 
-                            [class.filled]="filled">★</span>
+    <!-- Dashboard Content -->
+    <div *ngIf="!isLoading" class="dashboard-content">
+        <!-- Header Section -->
+        <div class="dashboard-header">
+            <div class="profile-section">
+                <div class="profile-avatar-container">
+                    <div class="profile-avatar" *ngIf="!userProfile?.profile_picture">
+                        {{ getInitials() }}
                     </div>
-                    <p class="list-item-meta">{{ getTimeAgo(rating.created_at) }}</p>
-                  </div>
+                    <img
+                        *ngIf="userProfile?.profile_picture"
+                        [src]="userProfile?.profile_picture"
+                        alt="Profile Picture"
+                        class="profile-picture"
+                    />
+                    <button
+                        class="edit-picture-btn"
+                        (click)="togglePictureEdit()"
+                        title="Change profile picture"
+                    >
+                        <img src="/icons/camera.svg" alt="Edit" width="20" height="20" />
+                    </button>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Search History Tab -->
-      <div *ngIf="activeTab === 'history'" class="history-tab">
-        <div class="content-card">
-          <h4 class="card-title">Complete Search History</h4>
-          <div *ngIf="searchHistory.length === 0" class="empty-state">
-            <img src="/icons/search.svg" alt="No searches" width="48" height="48" class="mb-3 opacity-50" />
-            <p>You haven't made any searches yet</p>
-          </div>
-          <div *ngIf="searchHistory.length > 0" class="table-responsive">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Search Query</th>
-                  <th>Type</th>
-                  <th>Results</th>
-                  <th>Date & Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let search of searchHistory">
-                  <td class="fw-bold">{{ search.search_query }}</td>
-                  <td><span class="badge">{{ search.search_type || 'General' }}</span></td>
-                  <td>{{ search.result_count }}</td>
-                  <td class="text-secondary">{{ formatDateTime(search.created_at) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Ratings Tab -->
-      <div *ngIf="activeTab === 'ratings'" class="ratings-tab">
-        <div class="content-card">
-          <h4 class="card-title">All Your Ratings</h4>
-          <div *ngIf="ratings.length === 0" class="empty-state">
-            <img src="/icons/star.svg" alt="No ratings" width="48" height="48" class="mb-3 opacity-50" />
-            <p>You haven't rated anything yet</p>
-          </div>
-          <div *ngIf="ratings.length > 0" class="ratings-grid">
-            <div *ngFor="let rating of ratings" class="rating-card">
-              <div class="rating-card-header">
-                <h5>{{ rating.item_type }}</h5>
-                <div class="rating-stars-large">
-                  <span *ngFor="let filled of getStarArray(rating.rating)" 
-                        class="star" 
-                        [class.filled]="filled">★</span>
+                <div class="profile-info">
+                    <h2 class="text-white mb-1">
+                        {{ userProfile?.full_name || userProfile?.username }}
+                    </h2>
+                    <p class="text-secondary mb-1">&#64;{{ userProfile?.username }}</p>
+                    <p class="text-secondary mb-0">
+                        <img
+                            src="/icons/calendar.svg"
+                            alt="Joined"
+                            width="16"
+                            height="16"
+                            class="me-2"
+                        />
+                        Member since {{ formatDate(userProfile?.created_at || '') }}
+                    </p>
                 </div>
-              </div>
-              <p class="rating-item-id">{{ rating.item_id }}</p>
-              <p *ngIf="rating.review" class="rating-review">{{ rating.review }}</p>
-              <p class="rating-date">{{ formatDateTime(rating.created_at) }}</p>
             </div>
-          </div>
+
+            <!-- Profile Picture Edit Modal -->
+            <div *ngIf="isEditingPicture" class="picture-edit-modal">
+                <div class="picture-edit-content">
+                    <h4 class="text-white mb-3">Update Profile Picture</h4>
+
+                    <!-- Mode Selector -->
+                    <div class="btn-group w-100 mb-3" role="group">
+                        <button
+                            type="button"
+                            class="btn"
+                            [class.btn-primary]="uploadMode === 'file'"
+                            [class.btn-outline-secondary]="uploadMode !== 'file'"
+                            (click)="switchMode('file')"
+                        >
+                            Upload File
+                        </button>
+                        <button
+                            type="button"
+                            class="btn"
+                            [class.btn-primary]="uploadMode === 'url'"
+                            [class.btn-outline-secondary]="uploadMode !== 'url'"
+                            (click)="switchMode('url')"
+                        >
+                            Use URL
+                        </button>
+                    </div>
+
+                    <!-- File Upload Mode -->
+                    <div *ngIf="uploadMode === 'file'" class="mb-3">
+                        <label class="form-label text-white">Choose Image File</label>
+                        <input
+                            type="file"
+                            class="form-control"
+                            accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                            (change)="onFileSelected($event)"
+                        />
+                        <small class="text-secondary d-block mt-1">
+                            Accepted formats: PNG, JPG, GIF, WebP (Max 5MB)
+                        </small>
+                        <small *ngIf="selectedFile" class="text-success d-block mt-1">
+                            Selected: {{ selectedFile.name }} ({{
+                                (selectedFile.size / 1024).toFixed(2)
+                            }}
+                            KB)
+                        </small>
+                    </div>
+
+                    <!-- URL Mode -->
+                    <div *ngIf="uploadMode === 'url'" class="mb-3">
+                        <label class="form-label text-white">Picture URL</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            [(ngModel)]="newPictureUrl"
+                            placeholder="https://example.com/your-picture.jpg"
+                        />
+                        <small class="text-secondary"
+                            >Enter a direct link to your profile picture</small
+                        >
+                    </div>
+
+                    <div *ngIf="pictureError" class="alert alert-danger">
+                        {{ pictureError }}
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button
+                            *ngIf="uploadMode === 'file'"
+                            class="btn btn-primary"
+                            (click)="uploadFile()"
+                            [disabled]="!selectedFile"
+                        >
+                            Upload
+                        </button>
+                        <button
+                            *ngIf="uploadMode === 'url'"
+                            class="btn btn-primary"
+                            (click)="updateProfilePicture()"
+                        >
+                            Update Picture
+                        </button>
+                        <button class="btn btn-secondary" (click)="togglePictureEdit()">
+                            Cancel
+                        </button>
+                        <button
+                            *ngIf="userProfile?.profile_picture"
+                            class="btn btn-danger ms-auto"
+                            (click)="removeProfilePicture()"
+                        >
+                            Remove Picture
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary">
+                    <img src="/icons/search.svg" alt="Searches" width="24" height="24" />
+                </div>
+                <div class="stat-info">
+                    <h3>{{ stats?.total_searches || 0 }}</h3>
+                    <p>Total Searches</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon bg-warning">
+                    <img src="/icons/star.svg" alt="Ratings" width="24" height="24" />
+                </div>
+                <div class="stat-info">
+                    <h3>{{ stats?.total_ratings || 0 }}</h3>
+                    <p>Ratings Given</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon bg-success">
+                    <img src="/icons/chart.svg" alt="Average" width="24" height="24" />
+                </div>
+                <div class="stat-info">
+                    <h3>{{ stats?.average_rating || 0 }}<span class="small-text">/5.0</span></h3>
+                    <p>Average Rating</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon bg-info">
+                    <img src="/icons/activity.svg" alt="Recent" width="24" height="24" />
+                </div>
+                <div class="stat-info">
+                    <h3>{{ stats?.recent_searches || 0 }}</h3>
+                    <p>Last 7 Days</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="dashboard-tabs">
+            <button
+                class="tab-button"
+                [class.active]="activeTab === 'overview'"
+                (click)="setActiveTab('overview')"
+            >
+                Overview
+            </button>
+            <button
+                class="tab-button"
+                [class.active]="activeTab === 'history'"
+                (click)="setActiveTab('history')"
+            >
+                Search History
+            </button>
+            <button
+                class="tab-button"
+                [class.active]="activeTab === 'ratings'"
+                (click)="setActiveTab('ratings')"
+            >
+                My Ratings
+            </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Overview Tab -->
+            <div *ngIf="activeTab === 'overview'" class="overview-tab">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="content-card">
+                            <h4 class="card-title">Recent Searches</h4>
+                            <div *ngIf="searchHistory.length === 0" class="empty-state">
+                                <p>No search history yet</p>
+                            </div>
+                            <div *ngIf="searchHistory.length > 0" class="list-container">
+                                <div
+                                    *ngFor="let search of searchHistory.slice(0, 5)"
+                                    class="list-item"
+                                >
+                                    <div class="list-item-icon">
+                                        <img
+                                            src="/icons/search.svg"
+                                            alt="Search"
+                                            width="16"
+                                            height="16"
+                                        />
+                                    </div>
+                                    <div class="list-item-content">
+                                        <p class="list-item-title">{{ search.search_query }}</p>
+                                        <p class="list-item-meta">
+                                            {{ getTimeAgo(search.created_at) }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <div class="content-card">
+                            <h4 class="card-title">Recent Ratings</h4>
+                            <div *ngIf="ratings.length === 0" class="empty-state">
+                                <p>No ratings yet</p>
+                            </div>
+                            <div *ngIf="ratings.length > 0" class="list-container">
+                                <div *ngFor="let rating of ratings.slice(0, 5)" class="list-item">
+                                    <div class="list-item-icon">
+                                        <img
+                                            src="/icons/star.svg"
+                                            alt="Rating"
+                                            width="16"
+                                            height="16"
+                                        />
+                                    </div>
+                                    <div class="list-item-content">
+                                        <p class="list-item-title">
+                                            {{ rating.item_type }} - {{ rating.item_id }}
+                                        </p>
+                                        <div class="rating-stars">
+                                            <span
+                                                *ngFor="let filled of getStarArray(rating.rating)"
+                                                class="star"
+                                                [class.filled]="filled"
+                                                >★</span
+                                            >
+                                        </div>
+                                        <p class="list-item-meta">
+                                            {{ getTimeAgo(rating.created_at) }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search History Tab -->
+            <div *ngIf="activeTab === 'history'" class="history-tab">
+                <div class="content-card">
+                    <h4 class="card-title">Complete Search History</h4>
+                    <div *ngIf="searchHistory.length === 0" class="empty-state">
+                        <img
+                            src="/icons/search.svg"
+                            alt="No searches"
+                            width="48"
+                            height="48"
+                            class="mb-3 opacity-50"
+                        />
+                        <p>You haven't made any searches yet</p>
+                    </div>
+                    <div *ngIf="searchHistory.length > 0" class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Search Query</th>
+                                    <th>Type</th>
+                                    <th>Results</th>
+                                    <th>Date & Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let search of searchHistory">
+                                    <td class="fw-bold">{{ search.search_query }}</td>
+                                    <td>
+                                        <span class="badge">{{
+                                            search.search_type || 'General'
+                                        }}</span>
+                                    </td>
+                                    <td>{{ search.result_count }}</td>
+                                    <td class="text-secondary">
+                                        {{ formatDateTime(search.created_at) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ratings Tab -->
+            <div *ngIf="activeTab === 'ratings'" class="ratings-tab">
+                <div class="content-card">
+                    <h4 class="card-title">All Your Ratings</h4>
+                    <div *ngIf="ratings.length === 0" class="empty-state">
+                        <img
+                            src="/icons/star.svg"
+                            alt="No ratings"
+                            width="48"
+                            height="48"
+                            class="mb-3 opacity-50"
+                        />
+                        <p>You haven't rated anything yet</p>
+                    </div>
+                    <div *ngIf="ratings.length > 0" class="ratings-grid">
+                        <div *ngFor="let rating of ratings" class="rating-card">
+                            <div class="rating-card-header">
+                                <h5>{{ rating.item_type }}</h5>
+                                <div class="rating-stars-large">
+                                    <span
+                                        *ngFor="let filled of getStarArray(rating.rating)"
+                                        class="star"
+                                        [class.filled]="filled"
+                                        >★</span
+                                    >
+                                </div>
+                            </div>
+                            <p class="rating-item-id">{{ rating.item_id }}</p>
+                            <p *ngIf="rating.review" class="rating-review">{{ rating.review }}</p>
+                            <p class="rating-date">{{ formatDateTime(rating.created_at) }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>

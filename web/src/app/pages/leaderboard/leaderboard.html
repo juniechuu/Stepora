@@ -1,75 +1,115 @@
 <div class="leaderboard-container">
-  <div class="leaderboard-header">
-    <h1 class="title">Top Rated Articles</h1>
-    <p class="subtitle">Discover the most highly-rated guides on Stepora</p>
-  </div>
-
-  @if (isLoading) {
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <p>Loading top articles...</p>
+    <div class="leaderboard-header">
+        <h1 class="title">Top Rated Articles</h1>
+        <p class="subtitle">Discover the most highly-rated guides on Stepora</p>
     </div>
-  } @else if (error) {
-    <div class="error-state">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="12"></line>
-        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-      </svg>
-      <p>{{ error }}</p>
-    </div>
-  } @else if (topArticles.length === 0) {
-    <div class="empty-state">
-      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-      </svg>
-      <h2>No Rated Articles Yet</h2>
-      <p>Be the first to rate an article!</p>
-      <a routerLink="/chatbot" class="cta-button">Explore Guides</a>
-    </div>
-  } @else {
-    <div class="leaderboard-list">
-      @for (article of topArticles; track article.item_id; let i = $index) {
-        <div class="article-card" [class.top-three]="i < 3">
-          <div class="rank">
-            @if (i === 0) {
-              <span class="medal gold">🥇</span>
-            } @else if (i === 1) {
-              <span class="medal silver">🥈</span>
-            } @else if (i === 2) {
-              <span class="medal bronze">🥉</span>
-            } @else {
-              <span class="rank-number">#{{ i + 1 }}</span>
-            }
-          </div>
 
-          <div class="article-info">
-            <h3 class="article-title">{{ article.item_id }}</h3>
-            <span class="article-type">{{ getArticleTypeLabel(article.item_type) }}</span>
-          </div>
-
-          <div class="rating-info">
-            <div class="stars">
-              @for (star of getStars(article.average_rating); track $index) {
-                <svg [class.filled]="star === 1" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                </svg>
-              }
-            </div>
-            <div class="rating-details">
-              <span class="rating-value">{{ article.average_rating.toFixed(1) }}</span>
-              <span class="rating-count">({{ article.total_ratings }} {{ article.total_ratings === 1 ? 'rating' : 'ratings' }})</span>
-            </div>
-          </div>
-
-          <button (click)="viewArticle(article.item_id)" class="view-article">
-            View Article
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-          </button>
+    @if (isLoading) {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading top articles...</p>
         </div>
-      }
-    </div>
-  }
+    } @else if (error) {
+        <div class="error-state">
+            <svg
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <p>{{ error }}</p>
+        </div>
+    } @else if (topArticles.length === 0) {
+        <div class="empty-state">
+            <svg
+                width="64"
+                height="64"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                ></polygon>
+            </svg>
+            <h2>No Rated Articles Yet</h2>
+            <p>Be the first to rate an article!</p>
+            <a routerLink="/chatbot" class="cta-button">Explore Guides</a>
+        </div>
+    } @else {
+        <div class="leaderboard-list">
+            @for (article of topArticles; track article.item_id; let i = $index) {
+                <div class="article-card" [class.top-three]="i < 3">
+                    <div class="rank">
+                        @if (i === 0) {
+                            <span class="medal gold">🥇</span>
+                        } @else if (i === 1) {
+                            <span class="medal silver">🥈</span>
+                        } @else if (i === 2) {
+                            <span class="medal bronze">🥉</span>
+                        } @else {
+                            <span class="rank-number">#{{ i + 1 }}</span>
+                        }
+                    </div>
+
+                    <div class="article-info">
+                        <h3 class="article-title">{{ article.item_id }}</h3>
+                        <span class="article-type">{{
+                            getArticleTypeLabel(article.item_type)
+                        }}</span>
+                    </div>
+
+                    <div class="rating-info">
+                        <div class="stars">
+                            @for (star of getStars(article.average_rating); track $index) {
+                                <svg
+                                    [class.filled]="star === 1"
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <polygon
+                                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                                    ></polygon>
+                                </svg>
+                            }
+                        </div>
+                        <div class="rating-details">
+                            <span class="rating-value">{{
+                                article.average_rating.toFixed(1)
+                            }}</span>
+                            <span class="rating-count"
+                                >({{ article.total_ratings }}
+                                {{ article.total_ratings === 1 ? 'rating' : 'ratings' }})</span
+                            >
+                        </div>
+                    </div>
+
+                    <button (click)="viewArticle(article.item_id)" class="view-article">
+                        View Article
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            }
+        </div>
+    }
 </div>

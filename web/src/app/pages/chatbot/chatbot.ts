@@ -9,10 +9,7 @@ import { HelperService } from '../../endpoints/helper.service';
 
 @Component({
     selector: 'app-chatbot',
-    imports: [
-        CommonModule,
-        FormsModule
-    ],
+    imports: [CommonModule, FormsModule],
     templateUrl: './chatbot.html',
     styleUrl: './chatbot.scss',
 })
@@ -35,7 +32,7 @@ export class Chatbot {
             },
             error: (error) => {
                 console.error('Error calling /hello:', error);
-            }
+            },
         });
     }
 
@@ -59,9 +56,10 @@ export class Chatbot {
             },
             error: (error) => {
                 console.error('Error calling OpenAI:', error);
-                this.error = error.error?.error || 'An error occurred while processing your request';
+                this.error =
+                    error.error?.error || 'An error occurred while processing your request';
                 this.isLoading = false;
-            }
+            },
         });
     }
     // #endregion

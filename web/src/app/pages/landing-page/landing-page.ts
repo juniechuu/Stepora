@@ -4,27 +4,27 @@ import { TeenAdults } from '../chatbot/components/teen-adults/teen-adults';
 import { Toddler } from '../chatbot/components/toddler/toddler';
 
 @Component({
-  selector: 'app-landing-page',
-  standalone: true,
-  imports: [LandingModal, TeenAdults, Toddler],
-  templateUrl: './landing-page.html',
-  styleUrl: './landing-page.scss',
+    selector: 'app-landing-page',
+    standalone: true,
+    imports: [LandingModal, TeenAdults, Toddler],
+    templateUrl: './landing-page.html',
+    styleUrl: './landing-page.scss',
 })
 export class LandingPage implements OnInit {
-  selectedAgeGroup: AgeGroup | null = null;
+    selectedAgeGroup: AgeGroup | null = null;
 
-  ngOnInit(): void {
-    // Check if coming from leaderboard
-    const autoSelectAdult = localStorage.getItem('autoSelectAdult');
-    if (autoSelectAdult === 'true') {
-      this.selectedAgeGroup = 'adult';
-      localStorage.removeItem('autoSelectAdult');
+    ngOnInit(): void {
+        // Check if coming from leaderboard
+        const autoSelectAdult = localStorage.getItem('autoSelectAdult');
+        if (autoSelectAdult === 'true') {
+            this.selectedAgeGroup = 'adult';
+            localStorage.removeItem('autoSelectAdult');
+        }
     }
-  }
 
-  onAgeGroupSelected(group: AgeGroup): void {
-    this.selectedAgeGroup = group;
-    console.log('Selected age group:', group);
-    // You can store this in a service or perform other actions here
-  }
+    onAgeGroupSelected(group: AgeGroup): void {
+        this.selectedAgeGroup = group;
+        console.log('Selected age group:', group);
+        // You can store this in a service or perform other actions here
+    }
 }

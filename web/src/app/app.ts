@@ -10,6 +10,6 @@ import { Navbar } from './core/navbar/navbar';
     selector: 'app-root',
     imports: [CommonModule, RouterOutlet, Navbar],
     templateUrl: './app.html',
-    styleUrl: './app.scss'
+    styleUrl: './app.scss',
 })
 export class App {}

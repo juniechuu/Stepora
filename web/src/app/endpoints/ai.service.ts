@@ -3,18 +3,18 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root',
 })
 export class AiService {
-	private baseUrl = 'http://127.0.0.1:5000/api';
+    private baseUrl = 'http://127.0.0.1:5000/api';
 
-	constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) {}
 
-	sendPromptToOpenAI(prompt: string): Observable<any> {
-		return this.http.post(`${this.baseUrl}/openai`, { prompt });
-	}
+    sendPromptToOpenAI(prompt: string): Observable<any> {
+        return this.http.post(`${this.baseUrl}/openai`, { prompt });
+    }
 
-	scrapeWikiHow(query: string): Observable<any> {
-		return this.http.post(`${this.baseUrl}/scrape-wikihow`, { query });
-	}
+    scrapeWikiHow(query: string): Observable<any> {
+        return this.http.post(`${this.baseUrl}/scrape-wikihow`, { query });
+    }
 }
