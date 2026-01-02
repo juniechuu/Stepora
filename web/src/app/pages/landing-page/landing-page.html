@@ -1,10 +1,12 @@
-<app-landing-modal (ageGroupSelected)="onAgeGroupSelected($event)"></app-landing-modal>
+@if (selectedAgeGroup === null) {
+    <app-landing-modal (ageGroupSelected)="onAgeGroupSelected($event)"></app-landing-modal>
+}
 
 @if (selectedAgeGroup === 'adult') {
     <app-teen-adults></app-teen-adults>
 } @else if (selectedAgeGroup === 'toddler') {
     <app-toddler></app-toddler>
-} @else {
+} @else if (selectedAgeGroup === null) {
     <div>
         <h1>Welcome to Stepora</h1>
         <span class="text-muted">Your one-stop solution for all your needs</span>

@@ -1,15 +1,14 @@
 // Angular
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterOutlet } from '@angular/router';
 
-// Pages
-import { Chatbot } from './pages/chatbot/chatbot';
+// Components
 import { Navbar } from './core/navbar/navbar';
-import { LandingPage } from './pages/landing-page/landing-page';
 
 @Component({
     selector: 'app-root',
-    imports: [Chatbot, Navbar, LandingPage],
+    imports: [CommonModule, RouterOutlet, Navbar],
     templateUrl: './app.html',
     styleUrl: './app.scss'
 })

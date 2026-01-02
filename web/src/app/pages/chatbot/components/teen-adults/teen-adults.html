@@ -58,12 +58,75 @@
     </div>
   </div>
 
+  <!-- AI Suggestions Modal -->
+  @if (showSuggestions) {
+    <div class="suggestions-overlay" (click)="closeSuggestions()">
+      <div class="suggestions-modal" (click)="$event.stopPropagation()">
+        <button class="close-button" (click)="closeSuggestions()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        
+        <div class="suggestions-header">
+          <svg class="bulb-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18h6"></path>
+            <path d="M10 22h4"></path>
+            <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.33.47 2.55 1.5 3.5.76.76 1.23 1.52 1.41 2.5"></path>
+          </svg>
+          <h2 class="suggestions-title">Refine Your Search</h2>
+          <p class="suggestions-subtitle">Did you mean one of these?</p>
+        </div>
+
+        <div class="suggestions-body">
+          @if (isLoadingSuggestions) {
+            <div class="suggestions-loading">
+              <div class="loading-spinner">
+                <span class="spinner"></span>
+              </div>
+              <p class="loading-text">Generating suggestions...</p>
+            </div>
+          } @else {
+            <div class="suggestions-list">
+              @for (suggestion of suggestions; track suggestion) {
+                <button class="suggestion-card" (click)="selectSuggestion(suggestion)">
+                  <svg class="suggestion-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18h6"></path>
+                    <path d="M10 22h4"></path>
+                    <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.33.47 2.55 1.5 3.5.76.76 1.23 1.52 1.41 2.5"></path>
+                  </svg>
+                  <span class="suggestion-text">{{ suggestion }}</span>
+                  <svg class="suggestion-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
   <!-- Article Content -->
   @if (article) {
     <div class="article-container">
       <!-- Article Header -->
       <header class="article-header">
-        <h1 class="article-title">{{ article.title }}</h1>
+        <div class="header-top">
+          <h1 class="article-title">{{ article.title }}</h1>
+          @if (totalRatings > 0) {
+            <div class="aggregate-rating">
+              <span class="rating-value">{{ aggregateRating.toFixed(1) }}</span>
+              <span class="rating-max">/5.0</span>
+              <svg class="rating-star" width="20" height="20" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <span class="rating-count">({{ totalRatings }} {{ totalRatings === 1 ? 'rating' : 'ratings' }})</span>
+            </div>
+          }
+        </div>
         <div class="article-meta">
           <div class="meta-item">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -177,6 +240,146 @@
           </div>
         </section>
       }
+
+      <!-- Rating Section -->
+      <section class="rating-section-container">
+        @if (authService.isLoggedIn()) {
+          <div class="rating-section">
+            <span class="rating-label">Rate this guide:</span>
+            <div class="stars-container" (mouseleave)="clearHover()">
+              @for (star of [1, 2, 3, 4, 5]; track star) {
+                <svg 
+                  class="star" 
+                  [class.filled]="getStarClass(star) === 'filled'"
+                  [class.empty]="getStarClass(star) === 'empty'"
+                  (mouseenter)="hoverRating(star)"
+                  (click)="submitRating(star)"
+                  width="24" 
+                  height="24" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  stroke-width="2"
+                >
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              }
+            </div>
+            @if (userRating > 0) {
+              <span class="rating-text">You rated this {{ userRating }}/5</span>
+            }
+            @if (isSubmittingRating) {
+              <span class="rating-submitting">Submitting...</span>
+            }
+          </div>
+        } @else {
+          <div class="rating-section">
+            <span class="rating-label">
+              <a routerLink="/login">Login</a> to rate this guide
+            </span>
+          </div>
+        }
+      </section>
+
+      <!-- Comments Section -->
+      <section class="comments-section">
+        <h2 class="comments-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          Comments ({{ comments.length }})
+        </h2>
+
+        @if (authService.isLoggedIn()) {
+          <div class="add-comment">
+            <textarea 
+              class="comment-input"
+              [(ngModel)]="newComment"
+              placeholder="Share your thoughts..."
+              rows="3"
+            ></textarea>
+            <button class="comment-submit" (click)="addComment()" [disabled]="!newComment.trim()">
+              Post Comment
+            </button>
+          </div>
+        } @else {
+          <div class="login-prompt">
+            Please <a routerLink="/login">login</a> to comment
+          </div>
+        }
+
+        <div class="comments-list">
+          @if (isLoadingComments) {
+            <div class="loading-comments">Loading comments...</div>
+          } @else {
+            @for (comment of comments; track comment.id) {
+              <div class="comment">
+                <div class="comment-header">
+                  <div class="comment-author">
+                    @if (comment.profile_picture) {
+                      <img [src]="comment.profile_picture" class="author-avatar" alt="avatar">
+                    } @else {
+                      <div class="author-avatar-text">{{ comment.username.charAt(0).toUpperCase() }}</div>
+                    }
+                    <span class="author-name">{{ comment.username }}</span>
+                    <span class="comment-date">{{ comment.created_at | date: 'short' }}</span>
+                  </div>
+                  @if (isCommentOwner(comment)) {
+                    <button class="delete-comment" (click)="deleteComment(comment.id)">Delete</button>
+                  }
+                </div>
+                <p class="comment-text">{{ comment.comment_text }}</p>
+                <div class="comment-actions">
+                  @if (authService.isLoggedIn()) {
+                    <button class="reply-button" (click)="startReply(comment.id)">Reply</button>
+                  }
+                </div>
+
+                @if (replyingTo === comment.id) {
+                  <div class="reply-form">
+                    <textarea 
+                      class="reply-input"
+                      [(ngModel)]="replyText"
+                      placeholder="Write a reply..."
+                      rows="2"
+                    ></textarea>
+                    <div class="reply-actions">
+                      <button class="reply-submit" (click)="addReply(comment.id)" [disabled]="!replyText.trim()">
+                        Post Reply
+                      </button>
+                      <button class="reply-cancel" (click)="cancelReply()">Cancel</button>
+                    </div>
+                  </div>
+                }
+
+                @if (comment.replies && comment.replies.length > 0) {
+                  <div class="replies">
+                    @for (reply of comment.replies; track reply.id) {
+                      <div class="reply">
+                        <div class="comment-header">
+                          <div class="comment-author">
+                            @if (reply.profile_picture) {
+                              <img [src]="reply.profile_picture" class="author-avatar small" alt="avatar">
+                            } @else {
+                              <div class="author-avatar-text small">{{ reply.username.charAt(0).toUpperCase() }}</div>
+                            }
+                            <span class="author-name">{{ reply.username }}</span>
+                            <span class="comment-date">{{ reply.created_at | date: 'short' }}</span>
+                          </div>
+                          @if (isCommentOwner(reply)) {
+                            <button class="delete-comment" (click)="deleteComment(reply.id)">Delete</button>
+                          }
+                        </div>
+                        <p class="comment-text">{{ reply.comment_text }}</p>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+      </section>
 
       <!-- Back to Top -->
       <div class="back-to-top">

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { LandingModal, AgeGroup } from './components/landing-modal/landing-modal';
 import { TeenAdults } from '../chatbot/components/teen-adults/teen-adults';
 import { Toddler } from '../chatbot/components/toddler/toddler';
@@ -10,8 +10,17 @@ import { Toddler } from '../chatbot/components/toddler/toddler';
   templateUrl: './landing-page.html',
   styleUrl: './landing-page.scss',
 })
-export class LandingPage {
+export class LandingPage implements OnInit {
   selectedAgeGroup: AgeGroup | null = null;
+
+  ngOnInit(): void {
+    // Check if coming from leaderboard
+    const autoSelectAdult = localStorage.getItem('autoSelectAdult');
+    if (autoSelectAdult === 'true') {
+      this.selectedAgeGroup = 'adult';
+      localStorage.removeItem('autoSelectAdult');
+    }
+  }
 
   onAgeGroupSelected(group: AgeGroup): void {
     this.selectedAgeGroup = group;

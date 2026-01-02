@@ -1,0 +1,126 @@
+<div class="register-container">
+  <div class="register-card">
+    <div class="text-center mb-4">
+      <img 
+        src="/logos/stepora_white.svg" 
+        alt="Stepora" 
+        width="150" 
+        height="100"
+        class="mb-3"
+      />
+      <h2 class="text-white">Create Account</h2>
+      <p class="text-secondary">Join Stepora today</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <label for="username" class="form-label text-white">
+          Username <span class="text-danger">*</span>
+        </label>
+        <input 
+          type="text" 
+          class="form-control" 
+          id="username"
+          [(ngModel)]="username"
+          name="username"
+          placeholder="Choose a username"
+          required
+          [disabled]="isLoading"
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label text-white">
+          Email <span class="text-danger">*</span>
+        </label>
+        <input 
+          type="email" 
+          class="form-control" 
+          id="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="Enter your email"
+          required
+          [disabled]="isLoading"
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="fullName" class="form-label text-white">Full Name (Optional)</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          id="fullName"
+          [(ngModel)]="fullName"
+          name="fullName"
+          placeholder="Enter your full name"
+          [disabled]="isLoading"
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label text-white">
+          Password <span class="text-danger">*</span>
+        </label>
+        <input 
+          type="password" 
+          class="form-control" 
+          id="password"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="Create a password (min 6 characters)"
+          required
+          [disabled]="isLoading"
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="confirmPassword" class="form-label text-white">
+          Confirm Password <span class="text-danger">*</span>
+        </label>
+        <input 
+          type="password" 
+          class="form-control" 
+          id="confirmPassword"
+          [(ngModel)]="confirmPassword"
+          name="confirmPassword"
+          placeholder="Re-enter your password"
+          required
+          [disabled]="isLoading"
+        />
+      </div>
+
+      <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+        {{ errorMessage }}
+      </div>
+
+      <div *ngIf="successMessage" class="alert alert-success" role="alert">
+        {{ successMessage }}
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn btn-primary w-100 mb-3"
+        [disabled]="isLoading"
+      >
+        <span *ngIf="!isLoading">Create Account</span>
+        <span *ngIf="isLoading">
+          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          Creating account...
+        </span>
+      </button>
+
+      <div class="text-center">
+        <p class="text-secondary mb-0">
+          Already have an account? 
+          <a 
+            class="text-primary cursor-pointer text-decoration-none" 
+            (click)="goToLogin()"
+          >
+            Login here
+          </a>
+        </p>
+      </div>
+    </form>
+  </div>
+</div>
