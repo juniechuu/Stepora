@@ -18,7 +18,7 @@ export class About {
         {
             icon: '/icons/users.svg',
             title: 'Age-Appropriate Content',
-            description: 'Content adapted for toddlers, teens/adults, and elderly users',
+            description: 'Content adapted for toddlers and teens',
         },
         {
             icon: '/icons/star.svg',

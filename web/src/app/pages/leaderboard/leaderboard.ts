@@ -49,7 +49,7 @@ export class Leaderboard implements OnInit {
         const labels: { [key: string]: string } = {
             'teen-adult': 'How-To Guide',
             toddler: 'Simple Guide',
-            elderly: 'Detailed Guide',
+            elderly: 'How-To Guide',
         };
         return labels[type] || type;
     }

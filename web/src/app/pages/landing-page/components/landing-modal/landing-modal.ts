@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-export type AgeGroup = 'toddler' | 'adult' | 'elderly';
+export type AgeGroup = 'toddler' | 'adult';
 
 @Component({
     selector: 'app-landing-modal',
